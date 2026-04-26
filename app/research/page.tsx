@@ -129,7 +129,7 @@ export default function Research() {
     setActiveCase(0)
     setSaved(false)
     try {
-      const res = await fetch('https://lexindia-backend-production.up.railway.app', {
+      const res = await fetch('https://lexindia-backend-production.up.railway.app/api/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: sq }),
