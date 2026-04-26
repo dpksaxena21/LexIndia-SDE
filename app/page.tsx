@@ -134,14 +134,13 @@ function ParticleField({ dark }: { dark: boolean }) {
     init()
     window.addEventListener('resize', init)
 
-    // More particles — 120 instead of 70
-    const particles = Array.from({ length: 120 }, () => ({
+    const particles = Array.from({ length: 70 }, () => ({
       x: Math.random() * window.innerWidth,
       y: Math.random() * window.innerHeight,
       vx: (Math.random() - 0.5) * 0.08,
       vy: (Math.random() - 0.5) * 0.08,
-      r: Math.random() * 1.8 + 0.4,
-      o: Math.random() * 0.45 + 0.1,
+      r: Math.random() * 1.5 + 0.5,
+      o: Math.random() * 0.4 + 0.1,
     }))
 
     function draw() {
@@ -166,7 +165,7 @@ function ParticleField({ dark }: { dark: boolean }) {
             ctx!.beginPath()
             ctx!.moveTo(particles[i].x, particles[i].y)
             ctx!.lineTo(particles[j].x, particles[j].y)
-            ctx!.strokeStyle = `rgba(${rgb},${0.18 * (1 - d / 160)})`
+            ctx!.strokeStyle = `rgba(${rgb},${0.15 * (1 - d / 160)})`
             ctx!.lineWidth = 0.6
             ctx!.stroke()
           }
@@ -218,51 +217,39 @@ function Marquee({ dark }: { dark: boolean }) {
   )
 }
 
-// Stat card — count animates on hover every time
 function StatCard({ target, suffix, label, index, textPrimary, textDim, border }: {
   target: number; suffix: string; label: string; index: number;
   textPrimary: string; textDim: string; border: string;
 }) {
-  const [count, setCount] = useState(target)
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [count, setCount] = useState(0)
+  const started = useRef(false)
 
-  function runCount() {
-    if (timerRef.current) clearInterval(timerRef.current)
-    let step = 0
-    const steps = 40
-    const duration = 1000
-    timerRef.current = setInterval(() => {
-      step++
-      const eased = 1 - Math.pow(1 - step / steps, 3)
-      setCount(Math.floor(eased * target))
-      if (step >= steps) {
-        setCount(target)
-        clearInterval(timerRef.current!)
-      }
-    }, duration / steps)
-  }
-
-  // Also run once on mount after intro
   useEffect(() => {
+    started.current = false
     setCount(0)
-    const t = setTimeout(runCount, 3800)
-    return () => clearTimeout(t)
-  }, [])
+    const delay = setTimeout(() => {
+      if (started.current) return
+      started.current = true
+      const steps = 50
+      const duration = 1800
+      let step = 0
+      const timer = setInterval(() => {
+        step++
+        const eased = 1 - Math.pow(1 - step / steps, 3)
+        setCount(Math.floor(eased * target))
+        if (step >= steps) { setCount(target); clearInterval(timer) }
+      }, duration / steps)
+    }, 3800)
+    return () => clearTimeout(delay)
+  }, [target])
 
   return (
-    <div
-      onMouseEnter={runCount}
-      style={{
-        padding: '28px 16px', textAlign: 'center',
-        borderRight: index < 3 ? `1px solid ${border}` : 'none',
-        transition: 'border-color 0.3s', cursor: 'default',
-      }}
-    >
-      <div style={{
-        fontSize: 28, fontWeight: 800, color: textPrimary,
-        marginBottom: 4, transition:'color 0.3s',
-        fontVariantNumeric:'tabular-nums',
-      }}>
+    <div style={{
+      padding: '28px 16px', textAlign: 'center',
+      borderRight: index < 3 ? `1px solid ${border}` : 'none',
+      transition: 'border-color 0.3s',
+    }}>
+      <div style={{ fontSize: 28, fontWeight: 800, color: textPrimary, marginBottom: 4, transition:'color 0.3s', fontVariantNumeric:'tabular-nums' }}>
         {count}{suffix}
       </div>
       <div style={{ fontSize: 11, color: textDim, letterSpacing: 1, transition:'color 0.3s' }}>{label}</div>
@@ -298,6 +285,12 @@ const iconsLight: Record<string, React.ReactNode> = Object.fromEntries(
   ])
 )
 
+const MODULE_PATHS: Record<string, string> = {
+  LexSearch: '/research',
+  LexChat: '/assistant',
+  LexDraft: '/drafts',
+}
+
 const modules = [
   { name: 'LexSearch',     desc: '27 crore cases' },
   { name: 'LexChat',       desc: 'AI legal advisor' },
@@ -317,50 +310,6 @@ const modules = [
   { name: 'LexVoice',      desc: 'Regional languages' },
 ]
 
-// Module card with shimmer gradient on hover
-function ModuleCard({ m, bgSurface, bgHover, border, borderHover, textPrimary, textMuted, icon }: {
-  m: { name: string; desc: string }
-  bgSurface: string; bgHover: string; border: string; borderHover: string
-  textPrimary: string; textMuted: string; icon: React.ReactNode
-}) {
-  const [hovered, setHovered] = useState(false)
-  return (
-    <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        background: hovered ? bgHover : bgSurface,
-        border: `1px solid ${hovered ? borderHover : border}`,
-        borderRadius: 10, padding: '18px', cursor: 'pointer',
-        transition: 'all 0.2s',
-        transform: hovered ? 'translateY(-2px)' : 'translateY(0)',
-        position: 'relative', overflow: 'hidden',
-      }}
-    >
-      {/* Shimmer gradient on hover */}
-      {hovered && (
-        <div style={{
-          position: 'absolute', inset: 0, borderRadius: 10,
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 50%, rgba(255,255,255,0.04) 100%)',
-          backgroundSize: '200% 200%',
-          animation: 'shimmerGrad 1.5s ease infinite',
-          pointerEvents: 'none',
-        }}/>
-      )}
-      <style>{`
-        @keyframes shimmerGrad {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-      `}</style>
-      <div style={{ marginBottom: 12, position:'relative', zIndex:1 }}>{icon}</div>
-      <div style={{ fontSize: 12, fontWeight: 700, color: textPrimary, marginBottom: 3, transition:'color 0.3s', position:'relative', zIndex:1 }}>{m.name}</div>
-      <div style={{ fontSize: 11, color: textMuted, transition:'color 0.3s', position:'relative', zIndex:1 }}>{m.desc}</div>
-    </div>
-  )
-}
-
 export default function Home() {
   const [intro, setIntro] = useState(true)
   const [page, setPage] = useState(false)
@@ -373,9 +322,9 @@ export default function Home() {
 
   const bg          = dark ? '#080809'                : '#F8F8F6'
   const bgSurface   = dark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.03)'
-  const bgHover     = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'
+  const bgHover     = dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)'
   const border      = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)'
-  const borderHover = dark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.2)'
+  const borderHover = dark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.2)'
   const textPrimary = dark ? '#ffffff'                : '#0a0a0b'
   const textMuted   = dark ? 'rgba(255,255,255,0.4)'  : 'rgba(0,0,0,0.55)'
   const textDim     = dark ? 'rgba(255,255,255,0.2)'  : 'rgba(0,0,0,0.4)'
@@ -439,12 +388,16 @@ export default function Home() {
               }}>
                 {dark ? '○ Light' : '● Dark'}
               </button>
-              <button style={{
-                background: btnBg, color: btnText, border: 'none',
-                padding: '8px 20px', borderRadius: 20, fontSize: 13,
-                fontWeight: 700, cursor: 'pointer', letterSpacing: 1,
-                transition: 'background 0.3s, color 0.3s',
-              }}>Get Started</button>
+              <button
+                onClick={() => window.location.href = '/research'}
+                style={{
+                  background: btnBg, color: btnText, border: 'none',
+                  padding: '8px 20px', borderRadius: 20, fontSize: 13,
+                  fontWeight: 700, cursor: 'pointer', letterSpacing: 1,
+                  transition: 'background 0.3s, color 0.3s',
+                }}>
+                Get Started
+              </button>
             </div>
           </nav>
 
@@ -484,6 +437,7 @@ export default function Home() {
 
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
               <button
+                onClick={() => window.location.href = '/research'}
                 style={{
                   background: btnBg, color: btnText, border: 'none',
                   padding: '13px 28px', borderRadius: 24, fontSize: 14,
@@ -503,12 +457,14 @@ export default function Home() {
               >
                 Try LexIndia Free
               </button>
-              <button style={{
-                background: 'transparent', color: textMuted,
-                border: `1px solid ${pillBorder}`,
-                padding: '13px 28px', borderRadius: 24, fontSize: 14,
-                cursor: 'pointer', transition: 'all 0.2s',
-              }}
+              <button
+                onClick={() => window.open('https://github.com/dpksaxena21/LexIndia-SDE', '_blank')}
+                style={{
+                  background: 'transparent', color: textMuted,
+                  border: `1px solid ${pillBorder}`,
+                  padding: '13px 28px', borderRadius: 24, fontSize: 14,
+                  cursor: 'pointer', transition: 'all 0.2s',
+                }}
                 onMouseEnter={e => {
                   const b = e.currentTarget as HTMLButtonElement
                   b.style.borderColor = borderHover
@@ -559,14 +515,30 @@ export default function Home() {
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8 }}>
               {modules.map((m, idx) => (
-                <div key={m.name} style={{ animation: `modIn 0.4s ease ${idx * 0.04}s both` }}>
-                  <ModuleCard
-                    m={m}
-                    bgSurface={bgSurface} bgHover={bgHover}
-                    border={border} borderHover={borderHover}
-                    textPrimary={textPrimary} textMuted={textMuted}
-                    icon={moduleIcons[m.name]}
-                  />
+                <div key={m.name}
+                  onClick={() => { const p = MODULE_PATHS[m.name]; if (p) window.location.href = p }}
+                  style={{
+                    background: bgSurface, border: `1px solid ${border}`,
+                    borderRadius: 10, padding: '18px', cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    animation: `modIn 0.4s ease ${idx * 0.04}s both`,
+                  }}
+                  onMouseEnter={e => {
+                    const el = e.currentTarget as HTMLDivElement
+                    el.style.background = bgHover
+                    el.style.borderColor = borderHover
+                    el.style.transform = 'translateY(-2px)'
+                  }}
+                  onMouseLeave={e => {
+                    const el = e.currentTarget as HTMLDivElement
+                    el.style.background = bgSurface
+                    el.style.borderColor = border
+                    el.style.transform = 'translateY(0)'
+                  }}
+                >
+                  <div style={{ marginBottom: 12 }}>{moduleIcons[m.name]}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: textPrimary, marginBottom: 3, transition:'color 0.3s' }}>{m.name}</div>
+                  <div style={{ fontSize: 11, color: textMuted, transition:'color 0.3s' }}>{m.desc}</div>
                 </div>
               ))}
             </div>
