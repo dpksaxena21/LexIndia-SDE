@@ -222,7 +222,7 @@ export default function Assistant() {
     setMessages(newMessages)
     setLoading(true)
     try {
-      const res = await fetch('https://lexindia-backend-production.up.railway.app/api/chat', {
+      const res = await fetch('https://lexindia-backend-production.up.railway.app', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: msg, history: messages.map(m => ({ role: m.role, content: m.content })) }),
