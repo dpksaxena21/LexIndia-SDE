@@ -116,10 +116,10 @@ export default function LoginPage() {
                   />
                 ))}
               </svg>
-              <span style={{ fontSize: '22px', fontWeight: 700, color: '#F4F1EA', letterSpacing: '-0.5px', opacity: litBlocks.length > 8 ? 1 : 0, transition: 'opacity 0.4s ease' }}>LexIndia</span>
+              <span style={{ fontSize: '28px', fontWeight: 700, color: '#F4F1EA', letterSpacing: '-0.5px', opacity: litBlocks.length > 8 ? 1 : 0, transition: 'opacity 0.4s ease' }}>LexIndia</span>
             </div>
           </Link>
-          <p style={{ color: '#3a3a3a', fontSize: '12px', letterSpacing: '1px', textTransform: 'uppercase' }}>AI Legal Research</p>
+          <p style={{ color: '#2a2a2a', fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase' }}>AI Legal Research</p>
         </div>
 
         {/* Card */}
