@@ -494,7 +494,7 @@ export default function Home() {
           {/* STATS */}
           <section style={{ maxWidth: 640, margin: '64px auto', padding: '0 24px' }}>
             <div style={{
-              display: 'grid', gridTemplateColumns: 'repeat(4,1fr)',
+              display: 'grid', gridTemplateColumns: winW < 640 ? 'repeat(2,1fr)' : 'repeat(4,1fr)',
               border: `1px solid ${border}`, borderRadius: 16,
               background: bgSurface, backdropFilter: 'blur(8px)',
               transition: 'background 0.3s, border-color 0.3s',
@@ -521,7 +521,7 @@ export default function Home() {
             <p style={{ textAlign: 'center', fontSize: 10, letterSpacing: 4, color: textDim, textTransform: 'uppercase', marginBottom: 32, transition:'color 0.3s' }}>
               16 Modules
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: winW < 640 ? 'repeat(2,1fr)' : 'repeat(4,1fr)', gap: 8 }}>
               {modules.map((m, idx) => (
                 <div key={m.name}
                   onClick={() => { const p = MODULE_PATHS[m.name]; if (p) window.location.href = p }}
