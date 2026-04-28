@@ -313,7 +313,10 @@ const modules = [
 ]
 
 export default function Home() {
+  const [winW, setWinW] = useState(1200)
+  useEffect(() => { setWinW(window.innerWidth); const h = () => setWinW(window.innerWidth); window.addEventListener('resize',h); return () => window.removeEventListener('resize',h) }, [])
   const { user } = useAuth()
+  const [navOpen, setNavOpen] = useState(false)
   const [intro, setIntro] = useState(true)
   const [page, setPage] = useState(false)
   const [dark, setDark] = useState(true)
