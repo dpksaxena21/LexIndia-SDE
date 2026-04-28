@@ -8,6 +8,25 @@ const API = 'https://lexindia-backend-production.up.railway.app'
 
 type Tab = 'overview' | 'searches' | 'drafts' | 'chats' | 'usage' | 'settings'
 
+const Ico = ({ d, rect, circle, poly, line, size = 15 }: any) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    {d && <path d={d} />}
+    {rect && rect.map((r: any, i: number) => <rect key={i} {...r} />)}
+    {circle && <circle {...circle} />}
+    {poly && <polyline points={poly} />}
+    {line && line.map((l: any, i: number) => <line key={i} {...l} />)}
+  </svg>
+)
+
+const tabIcons: Record<string, React.ReactNode> = {
+  overview: <Ico rect={[{x:3,y:3,width:7,height:7,rx:1},{x:14,y:3,width:7,height:7,rx:1},{x:3,y:14,width:7,height:7,rx:1},{x:14,y:14,width:7,height:7,rx:1}]} />,
+  searches: <Ico circle={{cx:11,cy:11,r:8}} d="m21 21-4.35-4.35" />,
+  drafts: <Ico d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" poly="14,2 14,8 20,8" line={[{x1:16,y1:13,x2:8,y2:13},{x1:16,y1:17,x2:8,y2:17}]} />,
+  chats: <Ico d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />,
+  usage: <Ico line={[{x1:18,y1:20,x2:18,y2:10},{x1:12,y1:20,x2:12,y2:4},{x1:6,y1:20,x2:6,y2:14}]} />,
+  settings: <Ico circle={{cx:12,cy:12,r:3}} d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />,
+}
+
 function DashboardContent() {
   const { user, token, logout, loading } = useAuth()
   const router = useRouter()
@@ -39,22 +58,26 @@ function DashboardContent() {
 
   if (loading || !user) return null
 
-  const tabs: { id: Tab; label: string; icon: string }[] = [
-    { id: 'overview', label: 'Overview', icon: '⬜' },
-    { id: 'searches', label: 'Search History', icon: '🔍' },
-    { id: 'drafts', label: 'Saved Drafts', icon: '📄' },
-    { id: 'chats', label: 'Chat History', icon: '💬' },
-    { id: 'usage', label: 'Usage & Plan', icon: '📊' },
-    { id: 'settings', label: 'Settings', icon: '⚙️' },
+  const tabs: { id: Tab; label: string }[] = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'searches', label: 'Search History' },
+    { id: 'drafts', label: 'Saved Drafts' },
+    { id: 'chats', label: 'Chat History' },
+    { id: 'usage', label: 'Usage & Plan' },
+    { id: 'settings', label: 'Settings' },
   ]
 
   const formatDate = (d: string) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 
-  const s = { background: '#0A0A0B', color: '#F4F1EA', minHeight: '100vh', fontFamily: "'Manrope', system-ui, sans-serif" }
-
   return (
-    <div style={s}>
-      {/* Navbar */}
+    <div style={{ background: '#0A0A0B', color: '#F4F1EA', minHeight: '100vh', fontFamily: "'Manrope', system-ui, sans-serif" }}>
+      <style>{`
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        .dash-card { transition: border-color 0.2s, transform 0.15s; }
+        .dash-card:hover { border-color: #3a3a3e !important; transform: translateY(-1px); }
+        .dash-tab:hover { background: #1a1a1e !important; color: #F4F1EA !important; }
+      `}</style>
+
       <nav style={{
         borderBottom: '1px solid #1e1e22', padding: '0 32px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -87,11 +110,10 @@ function DashboardContent() {
       </nav>
 
       <div style={{ display: 'flex', maxWidth: '1200px', margin: '0 auto', padding: '32px 24px', gap: '32px' }}>
-        {/* Sidebar */}
         <div style={{ width: '220px', flexShrink: 0 }}>
           <div style={{ position: 'sticky', top: '88px' }}>
             {tabs.map(t => (
-              <button key={t.id} onClick={() => setTab(t.id)} style={{
+              <button key={t.id} onClick={() => setTab(t.id)} className="dash-tab" style={{
                 width: '100%', padding: '10px 14px', marginBottom: '4px',
                 background: tab === t.id ? '#1a1a1e' : 'transparent',
                 border: 'none', borderRadius: '8px',
@@ -101,16 +123,14 @@ function DashboardContent() {
                 display: 'flex', alignItems: 'center', gap: '10px',
                 transition: 'all 0.15s',
               }}>
-                <span>{t.icon}</span>{t.label}
+                <span style={{ display: 'flex', opacity: tab === t.id ? 0.9 : 0.5 }}>{tabIcons[t.id]}</span>{t.label}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Main content */}
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ flex: 1, minWidth: 0, animation: 'fadeUp 0.3s ease' }}>
 
-          {/* OVERVIEW */}
           {tab === 'overview' && (
             <div>
               <h1 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px', letterSpacing: '-0.5px' }}>
@@ -120,23 +140,15 @@ function DashboardContent() {
                 {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
               </p>
 
-              {/* Stats */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' }}>
                 {[
-                  { label: 'Searches', value: searches.length, icon: '🔍', href: '/research' },
-                  { label: 'Drafts', value: documents.length, icon: '📄', href: '/drafts' },
-                  { label: 'Conversations', value: sessions.length, icon: '💬', href: '/assistant' },
+                  { label: 'Searches', value: searches.length, icon: tabIcons.searches, href: '/research' },
+                  { label: 'Drafts', value: documents.length, icon: tabIcons.drafts, href: '/drafts' },
+                  { label: 'Conversations', value: sessions.length, icon: tabIcons.chats, href: '/assistant' },
                 ].map(stat => (
                   <Link key={stat.label} href={stat.href} style={{ textDecoration: 'none' }}>
-                    <div style={{
-                      background: '#111113', border: '1px solid #1e1e22',
-                      borderRadius: '12px', padding: '20px',
-                      transition: 'border-color 0.2s',
-                    }}
-                    onMouseEnter={e => (e.currentTarget.style.borderColor = '#3a3a3e')}
-                    onMouseLeave={e => (e.currentTarget.style.borderColor = '#1e1e22')}
-                    >
-                      <div style={{ fontSize: '22px', marginBottom: '8px' }}>{stat.icon}</div>
+                    <div className="dash-card" style={{ background: '#111113', border: '1px solid #1e1e22', borderRadius: '12px', padding: '20px' }}>
+                      <div style={{ marginBottom: '8px', opacity: 0.5 }}>{stat.icon}</div>
                       <div style={{ fontSize: '28px', fontWeight: 700, color: '#F4F1EA' }}>{dataLoading ? '—' : stat.value}</div>
                       <div style={{ fontSize: '13px', color: '#6B6B6B', marginTop: '4px' }}>{stat.label}</div>
                     </div>
@@ -144,7 +156,6 @@ function DashboardContent() {
                 ))}
               </div>
 
-              {/* Quick actions */}
               <h2 style={{ fontSize: '12px', fontWeight: 600, marginBottom: '16px', color: '#8B8B8B', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Quick Actions</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '32px' }}>
                 {[
@@ -153,14 +164,7 @@ function DashboardContent() {
                   { label: 'Ask LexChat', desc: 'AI legal assistant', href: '/assistant', color: '#8b5cf6' },
                 ].map(action => (
                   <Link key={action.label} href={action.href} style={{ textDecoration: 'none' }}>
-                    <div style={{
-                      background: '#111113', border: '1px solid #1e1e22',
-                      borderRadius: '12px', padding: '16px',
-                      transition: 'border-color 0.2s',
-                    }}
-                    onMouseEnter={e => (e.currentTarget.style.borderColor = '#3a3a3e')}
-                    onMouseLeave={e => (e.currentTarget.style.borderColor = '#1e1e22')}
-                    >
+                    <div className="dash-card" style={{ background: '#111113', border: '1px solid #1e1e22', borderRadius: '12px', padding: '16px' }}>
                       <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: action.color, marginBottom: '10px' }} />
                       <div style={{ fontSize: '14px', fontWeight: 600, color: '#F4F1EA', marginBottom: '4px' }}>{action.label}</div>
                       <div style={{ fontSize: '12px', color: '#6B6B6B' }}>{action.desc}</div>
@@ -169,7 +173,6 @@ function DashboardContent() {
                 ))}
               </div>
 
-              {/* Recent activity */}
               <h2 style={{ fontSize: '12px', fontWeight: 600, marginBottom: '16px', color: '#8B8B8B', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Recent Activity</h2>
               {dataLoading ? (
                 <div style={{ color: '#6B6B6B', fontSize: '14px' }}>Loading...</div>
@@ -182,11 +185,8 @@ function DashboardContent() {
                   {[...searches.slice(0, 3).map(s => ({ type: 'search', text: s.query, date: s.created_at })),
                     ...documents.slice(0, 3).map(d => ({ type: 'draft', text: d.title, date: d.created_at })),
                   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5).map((item, i) => (
-                    <div key={i} style={{
-                      padding: '14px 16px', borderBottom: '1px solid #1a1a1e',
-                      display: 'flex', alignItems: 'center', gap: '12px',
-                    }}>
-                      <span style={{ fontSize: '16px' }}>{item.type === 'search' ? '🔍' : '📄'}</span>
+                    <div key={i} style={{ padding: '14px 16px', borderBottom: '1px solid #1a1a1e', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ display: 'flex', opacity: 0.5 }}>{item.type === 'search' ? tabIcons.searches : tabIcons.drafts}</span>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: '13px', color: '#F4F1EA', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.text}</div>
                         <div style={{ fontSize: '12px', color: '#6B6B6B', marginTop: '2px' }}>{item.type === 'search' ? 'Search' : 'Draft'} · {formatDate(item.date)}</div>
@@ -198,14 +198,13 @@ function DashboardContent() {
             </div>
           )}
 
-          {/* SEARCHES */}
           {tab === 'searches' && (
             <div>
               <h1 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '24px' }}>Search History</h1>
               {dataLoading ? <div style={{ color: '#6B6B6B' }}>Loading...</div> :
                searches.length === 0 ? <div style={{ color: '#6B6B6B', fontSize: '14px' }}>No searches yet.</div> :
                searches.map((s, i) => (
-                <div key={i} style={{ background: '#111113', border: '1px solid #1e1e22', borderRadius: '10px', padding: '16px', marginBottom: '10px' }}>
+                <div key={i} className="dash-card" style={{ background: '#111113', border: '1px solid #1e1e22', borderRadius: '10px', padding: '16px', marginBottom: '10px' }}>
                   <div style={{ fontSize: '14px', color: '#F4F1EA', fontWeight: 500 }}>{s.query}</div>
                   <div style={{ fontSize: '12px', color: '#6B6B6B', marginTop: '4px' }}>{s.module} · {formatDate(s.created_at)}</div>
                 </div>
@@ -213,14 +212,13 @@ function DashboardContent() {
             </div>
           )}
 
-          {/* DRAFTS */}
           {tab === 'drafts' && (
             <div>
               <h1 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '24px' }}>Saved Drafts</h1>
               {dataLoading ? <div style={{ color: '#6B6B6B' }}>Loading...</div> :
                documents.length === 0 ? <div style={{ color: '#6B6B6B', fontSize: '14px' }}>No saved drafts yet. Go to <Link href="/drafts" style={{ color: '#F4F1EA' }}>LexDraft</Link> to generate documents.</div> :
                documents.map((d, i) => (
-                <div key={i} style={{ background: '#111113', border: '1px solid #1e1e22', borderRadius: '10px', padding: '16px', marginBottom: '10px' }}>
+                <div key={i} className="dash-card" style={{ background: '#111113', border: '1px solid #1e1e22', borderRadius: '10px', padding: '16px', marginBottom: '10px' }}>
                   <div style={{ fontSize: '14px', color: '#F4F1EA', fontWeight: 500 }}>{d.title}</div>
                   <div style={{ fontSize: '12px', color: '#6B6B6B', marginTop: '4px' }}>{d.doc_type} · {formatDate(d.created_at)}</div>
                 </div>
@@ -228,14 +226,13 @@ function DashboardContent() {
             </div>
           )}
 
-          {/* CHATS */}
           {tab === 'chats' && (
             <div>
               <h1 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '24px' }}>Chat History</h1>
               {dataLoading ? <div style={{ color: '#6B6B6B' }}>Loading...</div> :
                sessions.length === 0 ? <div style={{ color: '#6B6B6B', fontSize: '14px' }}>No conversations yet. Go to <Link href="/assistant" style={{ color: '#F4F1EA' }}>LexChat</Link> to start one.</div> :
                sessions.map((s: any, i: number) => (
-                <div key={i} style={{ background: '#111113', border: '1px solid #1e1e22', borderRadius: '10px', padding: '16px', marginBottom: '10px' }}>
+                <div key={i} className="dash-card" style={{ background: '#111113', border: '1px solid #1e1e22', borderRadius: '10px', padding: '16px', marginBottom: '10px' }}>
                   <div style={{ fontSize: '14px', color: '#F4F1EA', fontWeight: 500 }}>{s.title}</div>
                   <div style={{ fontSize: '12px', color: '#6B6B6B', marginTop: '4px' }}>Last updated · {formatDate(s.updated_at)}</div>
                 </div>
@@ -243,7 +240,6 @@ function DashboardContent() {
             </div>
           )}
 
-          {/* USAGE */}
           {tab === 'usage' && (
             <div>
               <h1 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '24px' }}>Usage & Plan</h1>
@@ -276,7 +272,6 @@ function DashboardContent() {
             </div>
           )}
 
-          {/* SETTINGS */}
           {tab === 'settings' && (
             <div>
               <h1 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '24px' }}>Settings</h1>
@@ -295,16 +290,12 @@ function DashboardContent() {
                   <div style={{ fontSize: '14px', color: '#F4F1EA', textTransform: 'capitalize' }}>{user.plan}</div>
                 </div>
               </div>
-              <button
-                onClick={() => { logout(); router.push('/') }}
-                style={{
-                  padding: '10px 20px', background: 'rgba(239,68,68,0.08)',
-                  border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px',
-                  color: '#ef4444', fontSize: '14px', cursor: 'pointer',
-                  fontFamily: 'inherit', fontWeight: 500,
-                }}>
-                Sign out
-              </button>
+              <button onClick={() => { logout(); router.push('/') }} style={{
+                padding: '10px 20px', background: 'rgba(239,68,68,0.08)',
+                border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px',
+                color: '#ef4444', fontSize: '14px', cursor: 'pointer',
+                fontFamily: 'inherit', fontWeight: 500,
+              }}>Sign out</button>
             </div>
           )}
 
