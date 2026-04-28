@@ -145,7 +145,7 @@ function DashboardContent() {
               </div>
 
               {/* Quick actions */}
-              <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px', color: '#8B8B8B', letterSpacing: '0.5px', textTransform: 'uppercase', fontSize: '12px' }}>Quick Actions</h2>
+              <h2 style={{ fontSize: '12px', fontWeight: 600, marginBottom: '16px', color: '#8B8B8B', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Quick Actions</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '32px' }}>
                 {[
                   { label: 'New Search', desc: 'Search Indian Kanoon', href: '/research', color: '#3b82f6' },
