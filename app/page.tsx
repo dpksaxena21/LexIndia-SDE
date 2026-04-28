@@ -368,7 +368,7 @@ export default function Home() {
           {/* NAVBAR */}
           <nav style={{
             borderBottom: `1px solid ${border}`,
-            padding: '14px 40px',
+            padding: winW < 640 ? '14px 16px' : '14px 40px',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             backdropFilter: 'blur(12px)',
             background: navBg,
@@ -383,9 +383,7 @@ export default function Home() {
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 28, fontSize: 13, color: textMuted }}>
-              <a href="/research" style={{ color: 'inherit', textDecoration: 'none' }}>Research</a>
-              <a href="/assistant" style={{ color: 'inherit', textDecoration: 'none' }}>Assistant</a>
-              <a href="/drafts" style={{ color: 'inherit', textDecoration: 'none' }}>Drafts</a>
+              {winW >= 640 && <><a href='/research' style={{ color: 'inherit', textDecoration: 'none' }}>Research</a><a href='/assistant' style={{ color: 'inherit', textDecoration: 'none' }}>Assistant</a><a href='/drafts' style={{ color: 'inherit', textDecoration: 'none' }}>Drafts</a></>}
               <button onClick={() => setDark(d => !d)} style={{
                 background: toggleBg, border: `1px solid ${border}`,
                 borderRadius: 20, padding: '6px 14px', cursor: 'pointer',
