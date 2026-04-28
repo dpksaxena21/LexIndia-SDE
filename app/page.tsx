@@ -1,5 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
+import { useAuth } from './auth/AuthContext'
+import UserMenu from './components/UserMenu'
 
 function LogoMark({ size = 32, color = '#ffffff' }: { size?: number; color?: string }) {
   return (
@@ -311,6 +313,7 @@ const modules = [
 ]
 
 export default function Home() {
+  const { user } = useAuth()
   const [intro, setIntro] = useState(true)
   const [page, setPage] = useState(false)
   const [dark, setDark] = useState(true)
@@ -388,16 +391,18 @@ export default function Home() {
               }}>
                 {dark ? '○ Light' : '● Dark'}
               </button>
-              <button
-                onClick={() => window.location.href = '/research'}
-                style={{
-                  background: btnBg, color: btnText, border: 'none',
-                  padding: '8px 20px', borderRadius: 20, fontSize: 13,
-                  fontWeight: 700, cursor: 'pointer', letterSpacing: 1,
-                  transition: 'background 0.3s, color 0.3s',
-                }}>
-                Get Started
-              </button>
+              {user ? <UserMenu /> : (
+                <button
+                  onClick={() => window.location.href = '/login'}
+                  style={{
+                    background: btnBg, color: btnText, border: 'none',
+                    padding: '8px 20px', borderRadius: 20, fontSize: 13,
+                    fontWeight: 700, cursor: 'pointer', letterSpacing: 1,
+                    transition: 'background 0.3s, color 0.3s',
+                  }}>
+                  Sign In
+                </button>
+              )}
             </div>
           </nav>
 
