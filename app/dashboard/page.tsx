@@ -8,7 +8,7 @@ const API = 'https://lexindia-backend-production.up.railway.app'
 
 type Tab = 'overview' | 'searches' | 'drafts' | 'chats' | 'usage' | 'settings'
 
-const Ico = ({ d, rect, circle, poly, line, size = 15 }: any) => (
+const Ico = ({ d, rect, circle, poly, line, size = 20 }: any) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     {d && <path d={d} />}
     {rect && rect.map((r: any, i: number) => <rect key={i} {...r} />)}
@@ -123,7 +123,7 @@ function DashboardContent() {
                 display: 'flex', alignItems: 'center', gap: '10px',
                 transition: 'all 0.15s',
               }}>
-                <span style={{ display: 'flex', opacity: tab === t.id ? 0.9 : 0.5 }}>{tabIcons[t.id]}</span>{t.label}
+                <span style={{ display: 'flex', opacity: tab === t.id ? 0.9 : 0.7 }}>{tabIcons[t.id]}</span>{t.label}
               </button>
             ))}
           </div>
@@ -148,7 +148,7 @@ function DashboardContent() {
                 ].map(stat => (
                   <Link key={stat.label} href={stat.href} style={{ textDecoration: 'none' }}>
                     <div className="dash-card" style={{ background: '#111113', border: '1px solid #1e1e22', borderRadius: '12px', padding: '20px' }}>
-                      <div style={{ marginBottom: '8px', opacity: 0.5 }}>{stat.icon}</div>
+                      <div style={{ marginBottom: '8px', opacity: 0.8 }}>{stat.icon}</div>
                       <div style={{ fontSize: '28px', fontWeight: 700, color: '#F4F1EA' }}>{dataLoading ? '—' : stat.value}</div>
                       <div style={{ fontSize: '13px', color: '#6B6B6B', marginTop: '4px' }}>{stat.label}</div>
                     </div>
