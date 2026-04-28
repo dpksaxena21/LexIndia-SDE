@@ -4,8 +4,6 @@ import { useAuth } from '../auth/AuthContext'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-const TICKER = ['BNS 2023', 'BNSS 2023', 'IPC 1860', 'CrPC 1973', 'Constitution of India', 'Indian Evidence Act', 'Supreme Court', 'High Courts', 'eCourts', 'District Courts', '27 Crore Judgments', 'LexSearch', 'LexChat', 'LexDraft', 'Legal AI', 'Indian Kanoon']
-
 export default function LoginPage() {
   const { login, googleLogin } = useAuth()
   const router = useRouter()
@@ -19,7 +17,6 @@ export default function LoginPage() {
 
   useEffect(() => {
     setTimeout(() => setMounted(true), 50)
-    // Logo block animation — light up sequentially
     const blocks = [0,1,2,3,4,5,6,7,8,9,10]
     blocks.forEach((_, i) => {
       setTimeout(() => setLitBlocks(prev => [...prev, i]), 100 + i * 80)
@@ -71,17 +68,9 @@ export default function LoginPage() {
           33% { transform: translate(-55%,-45%) scale(1.05); }
           66% { transform: translate(-45%,-55%) scale(1.1); }
         }
-        @keyframes ticker {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
-        }
         @keyframes scanLine {
           from { transform: translateY(-100%); }
           to { transform: translateY(100vh); }
-        }
-        @keyframes blockPop {
-          from { opacity: 0; transform: scale(0.5); }
-          to { opacity: 1; transform: scale(1); }
         }
         .lex-input:focus {
           border-color: rgba(199,165,106,0.4) !important;
@@ -115,10 +104,7 @@ export default function LoginPage() {
       <div style={{ width: '100%', maxWidth: '420px', position: 'relative', zIndex: 1 }}>
 
         {/* Animated Logo */}
-        <div style={{
-          textAlign: 'center', marginBottom: '36px',
-          opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease',
-        }}>
+        <div style={{ textAlign: 'center', marginBottom: '36px', opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease' }}>
           <Link href="/" style={{ textDecoration: 'none' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
               <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
@@ -130,15 +116,10 @@ export default function LoginPage() {
                   />
                 ))}
               </svg>
-              <span style={{
-                fontSize: '22px', fontWeight: 700, color: '#F4F1EA', letterSpacing: '-0.5px',
-                opacity: litBlocks.length > 8 ? 1 : 0, transition: 'opacity 0.4s ease',
-              }}>LexIndia</span>
+              <span style={{ fontSize: '22px', fontWeight: 700, color: '#F4F1EA', letterSpacing: '-0.5px', opacity: litBlocks.length > 8 ? 1 : 0, transition: 'opacity 0.4s ease' }}>LexIndia</span>
             </div>
           </Link>
-          <p style={{ color: '#3a3a3a', fontSize: '12px', letterSpacing: '1px', textTransform: 'uppercase' }}>
-            AI Legal Research
-          </p>
+          <p style={{ color: '#3a3a3a', fontSize: '12px', letterSpacing: '1px', textTransform: 'uppercase' }}>AI Legal Research</p>
         </div>
 
         {/* Card */}
@@ -150,7 +131,6 @@ export default function LoginPage() {
           transform: mounted ? 'translateY(0)' : 'translateY(20px)',
           transition: 'opacity 0.7s ease 0.15s, transform 0.7s ease 0.15s',
         }}>
-          {/* Google */}
           <button onClick={googleLogin} className="lex-google" style={{
             width: '100%', padding: '11px',
             background: '#fff', border: '1px solid rgba(0,0,0,0.08)',
@@ -170,7 +150,6 @@ export default function LoginPage() {
             Continue with Google
           </button>
 
-          {/* Divider */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '18px' }}>
             <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.04)' }} />
             <span style={{ color: '#2a2a2a', fontSize: '11px', letterSpacing: '0.5px' }}>OR</span>
@@ -178,14 +157,12 @@ export default function LoginPage() {
           </div>
 
           <form onSubmit={handleSubmit}>
-            {/* Email */}
             <div style={{ marginBottom: '12px' }}>
               <label style={{ display: 'block', marginBottom: '6px', fontSize: '11px', color: '#444', fontWeight: 600, letterSpacing: '0.8px' }}>EMAIL</label>
               <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                 required placeholder="you@example.com" className="lex-input" style={inputBase} />
             </div>
 
-            {/* Password with show/hide */}
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', marginBottom: '6px', fontSize: '11px', color: '#444', fontWeight: 600, letterSpacing: '0.8px' }}>PASSWORD</label>
               <div style={{ position: 'relative' }}>
@@ -229,32 +206,10 @@ export default function LoginPage() {
           </form>
         </div>
 
-        {/* Footer */}
-        <p style={{
-          textAlign: 'center', marginTop: '20px', color: '#2a2a2a', fontSize: '13px',
-          opacity: mounted ? 1 : 0, transition: 'opacity 0.8s ease 0.3s',
-        }}>
+        <p style={{ textAlign: 'center', marginTop: '20px', color: '#2a2a2a', fontSize: '13px', opacity: mounted ? 1 : 0, transition: 'opacity 0.8s ease 0.3s' }}>
           Don&apos;t have an account?{' '}
           <Link href="/register" style={{ color: '#6B6B6B', textDecoration: 'none', fontWeight: 500 }}>Create one</Link>
         </p>
-      </div>
-
-      {/* Legal ticker */}
-      <div style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 2,
-        borderTop: '1px solid rgba(255,255,255,0.03)',
-        padding: '10px 0', overflow: 'hidden',
-        background: 'rgba(6,6,8,0.8)', backdropFilter: 'blur(10px)',
-        opacity: mounted ? 1 : 0, transition: 'opacity 1s ease 0.5s',
-      }}>
-        <div style={{ display: 'flex', animation: 'ticker 30s linear infinite', width: 'max-content' }}>
-          {[...TICKER, ...TICKER].map((item, i) => (
-            <span key={i} style={{ fontSize: '10px', color: '#2a2a2a', letterSpacing: '1.5px', textTransform: 'uppercase', marginRight: '48px', whiteSpace: 'nowrap' }}>
-              {item}
-              <span style={{ marginLeft: '48px', color: '#1a1a1a' }}>·</span>
-            </span>
-          ))}
-        </div>
       </div>
     </div>
   )

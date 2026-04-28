@@ -4,8 +4,6 @@ import { useAuth } from '../auth/AuthContext'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-const TICKER = ['BNS 2023', 'BNSS 2023', 'IPC 1860', 'CrPC 1973', 'Constitution of India', 'Indian Evidence Act', 'Supreme Court', 'High Courts', 'eCourts', 'District Courts', '27 Crore Judgments', 'LexSearch', 'LexChat', 'LexDraft', 'Legal AI', 'Indian Kanoon']
-
 export default function RegisterPage() {
   const { register, googleLogin } = useAuth()
   const router = useRouter()
@@ -72,10 +70,6 @@ export default function RegisterPage() {
           33% { transform: translate(-55%,-45%) scale(1.05); }
           66% { transform: translate(-45%,-55%) scale(1.1); }
         }
-        @keyframes ticker {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
-        }
         @keyframes scanLine {
           from { transform: translateY(-100%); }
           to { transform: translateY(100vh); }
@@ -90,73 +84,41 @@ export default function RegisterPage() {
         .eye-btn:hover { color: #8B8B8B; }
       `}</style>
 
-      {/* Grid */}
-      <div style={{
-        position: 'fixed', inset: 0, zIndex: 0,
-        backgroundImage: 'linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)',
-        backgroundSize: '48px 48px',
-      }} />
-
-      {/* Scan line */}
-      <div style={{
-        position: 'fixed', left: 0, right: 0, height: '1px',
-        background: 'linear-gradient(90deg, transparent, rgba(199,165,106,0.12), transparent)',
-        zIndex: 0, animation: 'scanLine 10s linear infinite', animationDelay: '1s',
-      }} />
-
-      {/* Orbs */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
+      <div style={{ position: 'fixed', left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(199,165,106,0.12), transparent)', zIndex: 0, animation: 'scanLine 10s linear infinite', animationDelay: '1s' }} />
       <div style={{ position: 'fixed', top: '30%', left: '60%', width: '600px', height: '600px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,165,106,0.07) 0%, transparent 70%)', transform: 'translate(-50%,-50%)', animation: 'orbFloat 14s ease-in-out infinite', pointerEvents: 'none', zIndex: 0 }} />
       <div style={{ position: 'fixed', top: '70%', left: '35%', width: '400px', height: '400px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 70%)', transform: 'translate(-50%,-50%)', animation: 'orbFloat2 18s ease-in-out infinite', pointerEvents: 'none', zIndex: 0 }} />
 
-      {/* Content */}
-      <div style={{ width: '100%', maxWidth: '420px', position: 'relative', zIndex: 1, paddingBottom: '48px' }}>
+      <div style={{ width: '100%', maxWidth: '420px', position: 'relative', zIndex: 1 }}>
 
-        {/* Animated Logo */}
-        <div style={{
-          textAlign: 'center', marginBottom: '32px',
-          opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease',
-        }}>
+        <div style={{ textAlign: 'center', marginBottom: '32px', opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease' }}>
           <Link href="/" style={{ textDecoration: 'none' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
               <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
                 {logoBlocks.map((b, i) => (
                   <rect key={i} x={b.x} y={b.y} width="5" height="5" rx="1"
-                    fill="#ffffff"
-                    opacity={litBlocks.includes(i) ? b.baseOp : 0}
-                    style={{ transition: 'opacity 0.3s ease' }}
-                  />
+                    fill="#ffffff" opacity={litBlocks.includes(i) ? b.baseOp : 0}
+                    style={{ transition: 'opacity 0.3s ease' }} />
                 ))}
               </svg>
-              <span style={{
-                fontSize: '22px', fontWeight: 700, color: '#F4F1EA', letterSpacing: '-0.5px',
-                opacity: litBlocks.length > 8 ? 1 : 0, transition: 'opacity 0.4s ease',
-              }}>LexIndia</span>
+              <span style={{ fontSize: '22px', fontWeight: 700, color: '#F4F1EA', letterSpacing: '-0.5px', opacity: litBlocks.length > 8 ? 1 : 0, transition: 'opacity 0.4s ease' }}>LexIndia</span>
             </div>
           </Link>
-          <p style={{ color: '#3a3a3a', fontSize: '12px', letterSpacing: '1px', textTransform: 'uppercase' }}>
-            Create your account
-          </p>
+          <p style={{ color: '#3a3a3a', fontSize: '12px', letterSpacing: '1px', textTransform: 'uppercase' }}>Create your account</p>
         </div>
 
-        {/* Card */}
         <div style={{
           background: 'rgba(10,10,12,0.9)', backdropFilter: 'blur(24px)',
           border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', padding: '28px',
           boxShadow: '0 32px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)',
-          opacity: mounted ? 1 : 0,
-          transform: mounted ? 'translateY(0)' : 'translateY(20px)',
+          opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)',
           transition: 'opacity 0.7s ease 0.15s, transform 0.7s ease 0.15s',
         }}>
-          {/* Google */}
           <button onClick={googleLogin} className="lex-google" style={{
-            width: '100%', padding: '11px',
-            background: '#fff', border: '1px solid rgba(0,0,0,0.08)',
-            borderRadius: '10px', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-            fontSize: '14px', fontWeight: 600, color: '#1a1a1a',
-            fontFamily: "'Manrope', system-ui, sans-serif",
-            marginBottom: '18px', transition: 'background 0.15s',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            width: '100%', padding: '11px', background: '#fff', border: '1px solid rgba(0,0,0,0.08)',
+            borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+            fontSize: '14px', fontWeight: 600, color: '#1a1a1a', fontFamily: "'Manrope', system-ui, sans-serif",
+            marginBottom: '18px', transition: 'background 0.15s', boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
           }}>
             <svg width="18" height="18" viewBox="0 0 48 48">
               <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -167,7 +129,6 @@ export default function RegisterPage() {
             Continue with Google
           </button>
 
-          {/* Divider */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '18px' }}>
             <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.04)' }} />
             <span style={{ color: '#2a2a2a', fontSize: '11px', letterSpacing: '0.5px' }}>OR</span>
@@ -175,21 +136,18 @@ export default function RegisterPage() {
           </div>
 
           <form onSubmit={handleSubmit}>
-            {/* Name */}
             <div style={{ marginBottom: '12px' }}>
               <label style={{ display: 'block', marginBottom: '6px', fontSize: '11px', color: '#444', fontWeight: 600, letterSpacing: '0.8px' }}>FULL NAME</label>
               <input type="text" value={name} onChange={e => setName(e.target.value)}
                 required placeholder="Adv. Sharma" className="lex-input" style={inputBase} />
             </div>
 
-            {/* Email */}
             <div style={{ marginBottom: '12px' }}>
               <label style={{ display: 'block', marginBottom: '6px', fontSize: '11px', color: '#444', fontWeight: 600, letterSpacing: '0.8px' }}>EMAIL</label>
               <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                 required placeholder="you@example.com" className="lex-input" style={inputBase} />
             </div>
 
-            {/* Password with show/hide */}
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', marginBottom: '6px', fontSize: '11px', color: '#444', fontWeight: 600, letterSpacing: '0.8px' }}>PASSWORD</label>
               <div style={{ position: 'relative' }}>
@@ -222,8 +180,7 @@ export default function RegisterPage() {
               width: '100%', padding: '12px',
               background: loading ? '#1a1a1e' : '#F4F1EA',
               color: loading ? '#444' : '#0A0A0B',
-              border: 'none', borderRadius: '10px',
-              fontSize: '14px', fontWeight: 700,
+              border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: 700,
               fontFamily: "'Manrope', system-ui, sans-serif",
               cursor: loading ? 'not-allowed' : 'pointer',
               letterSpacing: '0.3px', transition: 'background 0.15s',
@@ -233,32 +190,10 @@ export default function RegisterPage() {
           </form>
         </div>
 
-        {/* Footer */}
-        <p style={{
-          textAlign: 'center', marginTop: '20px', color: '#2a2a2a', fontSize: '13px',
-          opacity: mounted ? 1 : 0, transition: 'opacity 0.8s ease 0.3s',
-        }}>
+        <p style={{ textAlign: 'center', marginTop: '20px', color: '#2a2a2a', fontSize: '13px', opacity: mounted ? 1 : 0, transition: 'opacity 0.8s ease 0.3s' }}>
           Already have an account?{' '}
           <Link href="/login" style={{ color: '#6B6B6B', textDecoration: 'none', fontWeight: 500 }}>Sign in</Link>
         </p>
-      </div>
-
-      {/* Legal ticker */}
-      <div style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 2,
-        borderTop: '1px solid rgba(255,255,255,0.03)',
-        padding: '10px 0', overflow: 'hidden',
-        background: 'rgba(6,6,8,0.8)', backdropFilter: 'blur(10px)',
-        opacity: mounted ? 1 : 0, transition: 'opacity 1s ease 0.5s',
-      }}>
-        <div style={{ display: 'flex', animation: 'ticker 30s linear infinite', width: 'max-content' }}>
-          {[...TICKER, ...TICKER].map((item, i) => (
-            <span key={i} style={{ fontSize: '10px', color: '#2a2a2a', letterSpacing: '1.5px', textTransform: 'uppercase', marginRight: '48px', whiteSpace: 'nowrap' }}>
-              {item}
-              <span style={{ marginLeft: '48px', color: '#1a1a1a' }}>·</span>
-            </span>
-          ))}
-        </div>
       </div>
     </div>
   )
