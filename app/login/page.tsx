@@ -4,16 +4,27 @@ import { useAuth } from '../auth/AuthContext'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
+const TICKER = ['BNS 2023', 'BNSS 2023', 'IPC 1860', 'CrPC 1973', 'Constitution of India', 'Indian Evidence Act', 'Supreme Court', 'High Courts', 'eCourts', 'District Courts', '27 Crore Judgments', 'LexSearch', 'LexChat', 'LexDraft', 'Legal AI', 'Indian Kanoon']
+
 export default function LoginPage() {
   const { login, googleLogin } = useAuth()
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPass, setShowPass] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [litBlocks, setLitBlocks] = useState<number[]>([])
 
-  useEffect(() => { setTimeout(() => setMounted(true), 50) }, [])
+  useEffect(() => {
+    setTimeout(() => setMounted(true), 50)
+    // Logo block animation — light up sequentially
+    const blocks = [0,1,2,3,4,5,6,7,8,9,10]
+    blocks.forEach((_, i) => {
+      setTimeout(() => setLitBlocks(prev => [...prev, i]), 100 + i * 80)
+    })
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,6 +36,23 @@ export default function LoginPage() {
     else setError(res.error || 'Login failed')
   }
 
+  const logoBlocks = [
+    { x: 4,  y: 1,  baseOp: 0.25 }, { x: 4,  y: 7,  baseOp: 0.45 },
+    { x: 4,  y: 13, baseOp: 0.65 }, { x: 4,  y: 19, baseOp: 0.85 },
+    { x: 4,  y: 25, baseOp: 1    }, { x: 12, y: 7,  baseOp: 0.25 },
+    { x: 12, y: 13, baseOp: 0.5  }, { x: 12, y: 19, baseOp: 0.8  },
+    { x: 12, y: 25, baseOp: 1    }, { x: 20, y: 25, baseOp: 0.6  },
+    { x: 27, y: 25, baseOp: 0.3  },
+  ]
+
+  const inputBase: React.CSSProperties = {
+    width: '100%', padding: '11px 14px',
+    background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
+    borderRadius: '10px', color: '#F4F1EA', fontSize: '14px',
+    fontFamily: "'Manrope', system-ui, sans-serif", boxSizing: 'border-box',
+    outline: 'none', transition: 'border-color 0.2s, box-shadow 0.2s',
+  }
+
   return (
     <div style={{
       minHeight: '100vh', background: '#060608',
@@ -34,124 +62,93 @@ export default function LoginPage() {
     }}>
       <style>{`
         @keyframes orbFloat {
-          0%, 100% { transform: translate(-50%, -50%) scale(1); }
-          33% { transform: translate(-45%, -55%) scale(1.08); }
-          66% { transform: translate(-55%, -45%) scale(0.95); }
+          0%,100% { transform: translate(-50%,-50%) scale(1); }
+          33% { transform: translate(-45%,-55%) scale(1.08); }
+          66% { transform: translate(-55%,-45%) scale(0.95); }
         }
         @keyframes orbFloat2 {
-          0%, 100% { transform: translate(-50%, -50%) scale(1); }
-          33% { transform: translate(-55%, -45%) scale(1.05); }
-          66% { transform: translate(-45%, -55%) scale(1.1); }
+          0%,100% { transform: translate(-50%,-50%) scale(1); }
+          33% { transform: translate(-55%,-45%) scale(1.05); }
+          66% { transform: translate(-45%,-55%) scale(1.1); }
         }
-        @keyframes gridFade {
-          from { opacity: 0; } to { opacity: 1; }
-        }
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes shimmer {
-          0%, 100% { opacity: 0.4; }
-          50% { opacity: 0.8; }
+        @keyframes ticker {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
         }
         @keyframes scanLine {
           from { transform: translateY(-100%); }
           to { transform: translateY(100vh); }
         }
-        .lex-input { transition: border-color 0.2s, box-shadow 0.2s; }
-        .lex-input:focus { border-color: #3a3a3e !important; box-shadow: 0 0 0 3px rgba(199,165,106,0.06) !important; outline: none; }
+        @keyframes blockPop {
+          from { opacity: 0; transform: scale(0.5); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        .lex-input:focus {
+          border-color: rgba(199,165,106,0.4) !important;
+          box-shadow: 0 0 0 3px rgba(199,165,106,0.06), inset 0 0 0 1px rgba(199,165,106,0.1) !important;
+        }
         .lex-google:hover { background: #f8f8f8 !important; }
         .lex-submit:hover:not(:disabled) { background: #e8e5dd !important; }
+        .eye-btn { background: none; border: none; cursor: pointer; padding: 0; color: #555; transition: color 0.2s; }
+        .eye-btn:hover { color: #8B8B8B; }
       `}</style>
 
-      {/* Grid background */}
+      {/* Grid */}
       <div style={{
         position: 'fixed', inset: 0, zIndex: 0,
-        backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)',
+        backgroundImage: 'linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)',
         backgroundSize: '48px 48px',
-        animation: 'gridFade 2s ease forwards',
-        opacity: 0,
       }} />
 
       {/* Scan line */}
       <div style={{
         position: 'fixed', left: 0, right: 0, height: '1px',
-        background: 'linear-gradient(90deg, transparent, rgba(199,165,106,0.15), transparent)',
-        zIndex: 0, animation: 'scanLine 8s linear infinite',
-        animationDelay: '2s',
+        background: 'linear-gradient(90deg, transparent, rgba(199,165,106,0.12), transparent)',
+        zIndex: 0, animation: 'scanLine 10s linear infinite', animationDelay: '1s',
       }} />
 
-      {/* Orb 1 — gold */}
-      <div style={{
-        position: 'fixed', top: '30%', left: '40%',
-        width: '600px', height: '600px',
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(199,165,106,0.08) 0%, transparent 70%)',
-        transform: 'translate(-50%, -50%)',
-        animation: 'orbFloat 12s ease-in-out infinite',
-        pointerEvents: 'none', zIndex: 0,
-      }} />
-
-      {/* Orb 2 — blue-purple accent */}
-      <div style={{
-        position: 'fixed', top: '65%', left: '65%',
-        width: '400px', height: '400px',
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%)',
-        transform: 'translate(-50%, -50%)',
-        animation: 'orbFloat2 15s ease-in-out infinite',
-        pointerEvents: 'none', zIndex: 0,
-      }} />
-
-      {/* Corner accents */}
-      <div style={{ position: 'fixed', top: 0, left: 0, width: '200px', height: '200px',
-        background: 'radial-gradient(circle at top left, rgba(199,165,106,0.04) 0%, transparent 70%)',
-        pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', bottom: 0, right: 0, width: '200px', height: '200px',
-        background: 'radial-gradient(circle at bottom right, rgba(99,102,241,0.04) 0%, transparent 70%)',
-        pointerEvents: 'none', zIndex: 0 }} />
+      {/* Orbs */}
+      <div style={{ position: 'fixed', top: '30%', left: '40%', width: '600px', height: '600px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,165,106,0.07) 0%, transparent 70%)', transform: 'translate(-50%,-50%)', animation: 'orbFloat 14s ease-in-out infinite', pointerEvents: 'none', zIndex: 0 }} />
+      <div style={{ position: 'fixed', top: '65%', left: '65%', width: '400px', height: '400px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 70%)', transform: 'translate(-50%,-50%)', animation: 'orbFloat2 18s ease-in-out infinite', pointerEvents: 'none', zIndex: 0 }} />
 
       {/* Content */}
       <div style={{ width: '100%', maxWidth: '420px', position: 'relative', zIndex: 1 }}>
 
-        {/* Logo */}
+        {/* Animated Logo */}
         <div style={{
-          textAlign: 'center', marginBottom: '40px',
-          opacity: mounted ? 1 : 0,
-          transform: mounted ? 'translateY(0)' : 'translateY(-16px)',
-          transition: 'opacity 0.6s ease, transform 0.6s ease',
+          textAlign: 'center', marginBottom: '36px',
+          opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease',
         }}>
           <Link href="/" style={{ textDecoration: 'none' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
               <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-                <rect x="4" y="1"  width="5" height="5" rx="1" fill="#fff" opacity="0.25"/>
-                <rect x="4" y="7"  width="5" height="5" rx="1" fill="#fff" opacity="0.45"/>
-                <rect x="4" y="13" width="5" height="5" rx="1" fill="#fff" opacity="0.65"/>
-                <rect x="4" y="19" width="5" height="5" rx="1" fill="#fff" opacity="0.85"/>
-                <rect x="4" y="25" width="5" height="5" rx="1" fill="#fff"/>
-                <rect x="12" y="7"  width="5" height="5" rx="1" fill="#fff" opacity="0.25"/>
-                <rect x="12" y="13" width="5" height="5" rx="1" fill="#fff" opacity="0.5"/>
-                <rect x="12" y="19" width="5" height="5" rx="1" fill="#fff" opacity="0.8"/>
-                <rect x="12" y="25" width="5" height="5" rx="1" fill="#fff"/>
-                <rect x="20" y="25" width="5" height="5" rx="1" fill="#fff" opacity="0.6"/>
-                <rect x="27" y="25" width="5" height="5" rx="1" fill="#fff" opacity="0.3"/>
+                {logoBlocks.map((b, i) => (
+                  <rect key={i} x={b.x} y={b.y} width="5" height="5" rx="1"
+                    fill="#ffffff"
+                    opacity={litBlocks.includes(i) ? b.baseOp : 0}
+                    style={{ transition: 'opacity 0.3s ease' }}
+                  />
+                ))}
               </svg>
-              <span style={{ fontSize: '22px', fontWeight: 700, color: '#F4F1EA', letterSpacing: '-0.5px' }}>LexIndia</span>
+              <span style={{
+                fontSize: '22px', fontWeight: 700, color: '#F4F1EA', letterSpacing: '-0.5px',
+                opacity: litBlocks.length > 8 ? 1 : 0, transition: 'opacity 0.4s ease',
+              }}>LexIndia</span>
             </div>
           </Link>
-          <p style={{ color: '#4a4a4a', fontSize: '13px', letterSpacing: '0.5px', animation: 'shimmer 4s ease-in-out infinite' }}>
-            Sign in to your account
+          <p style={{ color: '#3a3a3a', fontSize: '12px', letterSpacing: '1px', textTransform: 'uppercase' }}>
+            AI Legal Research
           </p>
         </div>
 
         {/* Card */}
         <div style={{
-          background: 'rgba(10,10,12,0.85)', backdropFilter: 'blur(24px)',
-          border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', padding: '32px',
-          boxShadow: '0 32px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)',
+          background: 'rgba(10,10,12,0.9)', backdropFilter: 'blur(24px)',
+          border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', padding: '28px',
+          boxShadow: '0 32px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)',
           opacity: mounted ? 1 : 0,
-          transform: mounted ? 'translateY(0)' : 'translateY(24px)',
-          transition: 'opacity 0.7s ease 0.1s, transform 0.7s ease 0.1s',
+          transform: mounted ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'opacity 0.7s ease 0.15s, transform 0.7s ease 0.15s',
         }}>
           {/* Google */}
           <button onClick={googleLogin} className="lex-google" style={{
@@ -161,8 +158,8 @@ export default function LoginPage() {
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
             fontSize: '14px', fontWeight: 600, color: '#1a1a1a',
             fontFamily: "'Manrope', system-ui, sans-serif",
-            marginBottom: '20px', transition: 'background 0.15s',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
+            marginBottom: '18px', transition: 'background 0.15s',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
           }}>
             <svg width="18" height="18" viewBox="0 0 48 48">
               <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -174,47 +171,47 @@ export default function LoginPage() {
           </button>
 
           {/* Divider */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-            <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }} />
-            <span style={{ color: '#333', fontSize: '11px', letterSpacing: '0.5px' }}>OR</span>
-            <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '18px' }}>
+            <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.04)' }} />
+            <span style={{ color: '#2a2a2a', fontSize: '11px', letterSpacing: '0.5px' }}>OR</span>
+            <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.04)' }} />
           </div>
 
           <form onSubmit={handleSubmit}>
             {/* Email */}
-            <div style={{ marginBottom: '14px' }}>
-              <label style={{ display: 'block', marginBottom: '7px', fontSize: '12px', color: '#555', fontWeight: 500, letterSpacing: '0.3px' }}>EMAIL</label>
+            <div style={{ marginBottom: '12px' }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '11px', color: '#444', fontWeight: 600, letterSpacing: '0.8px' }}>EMAIL</label>
               <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-                required placeholder="you@example.com" className="lex-input"
-                style={{
-                  width: '100%', padding: '11px 14px',
-                  background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
-                  borderRadius: '10px', color: '#F4F1EA', fontSize: '14px',
-                  fontFamily: "'Manrope', system-ui, sans-serif", boxSizing: 'border-box',
-                }}
-              />
+                required placeholder="you@example.com" className="lex-input" style={inputBase} />
             </div>
 
-            {/* Password */}
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{ display: 'block', marginBottom: '7px', fontSize: '12px', color: '#555', fontWeight: 500, letterSpacing: '0.3px' }}>PASSWORD</label>
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-                required placeholder="••••••••" className="lex-input"
-                style={{
-                  width: '100%', padding: '11px 14px',
-                  background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
-                  borderRadius: '10px', color: '#F4F1EA', fontSize: '14px',
-                  fontFamily: "'Manrope', system-ui, sans-serif", boxSizing: 'border-box',
-                }}
-              />
+            {/* Password with show/hide */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '11px', color: '#444', fontWeight: 600, letterSpacing: '0.8px' }}>PASSWORD</label>
+              <div style={{ position: 'relative' }}>
+                <input type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
+                  required placeholder="••••••••" className="lex-input"
+                  style={{ ...inputBase, paddingRight: '42px' }} />
+                <button type="button" className="eye-btn" onClick={() => setShowPass(!showPass)}
+                  style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)' }}>
+                  {showPass ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
 
             {error && (
-              <div style={{
-                marginBottom: '16px', padding: '10px 14px',
-                background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.15)',
-                borderRadius: '8px', color: '#ef4444', fontSize: '13px',
-              }}>{error}</div>
+              <div style={{ marginBottom: '14px', padding: '10px 14px', background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.15)', borderRadius: '8px', color: '#ef4444', fontSize: '13px' }}>{error}</div>
             )}
 
             <button type="submit" disabled={loading} className="lex-submit" style={{
@@ -234,13 +231,30 @@ export default function LoginPage() {
 
         {/* Footer */}
         <p style={{
-          textAlign: 'center', marginTop: '24px', color: '#333', fontSize: '13px',
-          opacity: mounted ? 1 : 0,
-          transition: 'opacity 0.8s ease 0.3s',
+          textAlign: 'center', marginTop: '20px', color: '#2a2a2a', fontSize: '13px',
+          opacity: mounted ? 1 : 0, transition: 'opacity 0.8s ease 0.3s',
         }}>
           Don&apos;t have an account?{' '}
-          <Link href="/register" style={{ color: '#8B8B8B', textDecoration: 'none', fontWeight: 500 }}>Create one</Link>
+          <Link href="/register" style={{ color: '#6B6B6B', textDecoration: 'none', fontWeight: 500 }}>Create one</Link>
         </p>
+      </div>
+
+      {/* Legal ticker */}
+      <div style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 2,
+        borderTop: '1px solid rgba(255,255,255,0.03)',
+        padding: '10px 0', overflow: 'hidden',
+        background: 'rgba(6,6,8,0.8)', backdropFilter: 'blur(10px)',
+        opacity: mounted ? 1 : 0, transition: 'opacity 1s ease 0.5s',
+      }}>
+        <div style={{ display: 'flex', animation: 'ticker 30s linear infinite', width: 'max-content' }}>
+          {[...TICKER, ...TICKER].map((item, i) => (
+            <span key={i} style={{ fontSize: '10px', color: '#2a2a2a', letterSpacing: '1.5px', textTransform: 'uppercase', marginRight: '48px', whiteSpace: 'nowrap' }}>
+              {item}
+              <span style={{ marginLeft: '48px', color: '#1a1a1a' }}>·</span>
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   )
