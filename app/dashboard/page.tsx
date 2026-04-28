@@ -1,0 +1,323 @@
+'use client'
+import { useState, useEffect, Suspense } from 'react'
+import { useAuth } from '../auth/AuthContext'
+import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
+
+const API = 'https://lexindia-backend-production.up.railway.app'
+
+type Tab = 'overview' | 'searches' | 'drafts' | 'chats' | 'usage' | 'settings'
+
+function DashboardContent() {
+  const { user, token, logout, loading } = useAuth()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [tab, setTab] = useState<Tab>((searchParams.get('tab') as Tab) || 'overview')
+  const [searches, setSearches] = useState<any[]>([])
+  const [documents, setDocuments] = useState<any[]>([])
+  const [sessions, setSessions] = useState<any[]>([])
+  const [dataLoading, setDataLoading] = useState(false)
+
+  useEffect(() => {
+    if (!loading && !user) router.push('/login')
+  }, [user, loading, router])
+
+  useEffect(() => {
+    if (!token) return
+    setDataLoading(true)
+    Promise.all([
+      fetch(`${API}/api/searches`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()).catch(() => ({ searches: [] })),
+      fetch(`${API}/api/documents`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()).catch(() => ({ documents: [] })),
+      fetch(`${API}/api/chat/sessions`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()).catch(() => ({ sessions: [] })),
+    ]).then(([s, d, c]) => {
+      setSearches(s.searches || [])
+      setDocuments(d.documents || [])
+      setSessions(c.sessions || [])
+      setDataLoading(false)
+    })
+  }, [token])
+
+  if (loading || !user) return null
+
+  const tabs: { id: Tab; label: string; icon: string }[] = [
+    { id: 'overview', label: 'Overview', icon: '⬜' },
+    { id: 'searches', label: 'Search History', icon: '🔍' },
+    { id: 'drafts', label: 'Saved Drafts', icon: '📄' },
+    { id: 'chats', label: 'Chat History', icon: '💬' },
+    { id: 'usage', label: 'Usage & Plan', icon: '📊' },
+    { id: 'settings', label: 'Settings', icon: '⚙️' },
+  ]
+
+  const formatDate = (d: string) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+
+  const s = { background: '#0A0A0B', color: '#F4F1EA', minHeight: '100vh', fontFamily: "'Manrope', system-ui, sans-serif" }
+
+  return (
+    <div style={s}>
+      {/* Navbar */}
+      <nav style={{
+        borderBottom: '1px solid #1e1e22', padding: '0 32px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        height: '56px', position: 'sticky', top: 0, background: '#0A0A0B', zIndex: 10,
+      }}>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+          <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
+            <rect x="4" y="1" width="5" height="5" rx="1" fill="#fff" opacity="0.25"/>
+            <rect x="4" y="7" width="5" height="5" rx="1" fill="#fff" opacity="0.45"/>
+            <rect x="4" y="13" width="5" height="5" rx="1" fill="#fff" opacity="0.65"/>
+            <rect x="4" y="19" width="5" height="5" rx="1" fill="#fff" opacity="0.85"/>
+            <rect x="4" y="25" width="5" height="5" rx="1" fill="#fff"/>
+            <rect x="12" y="7" width="5" height="5" rx="1" fill="#fff" opacity="0.25"/>
+            <rect x="12" y="13" width="5" height="5" rx="1" fill="#fff" opacity="0.5"/>
+            <rect x="12" y="19" width="5" height="5" rx="1" fill="#fff" opacity="0.8"/>
+            <rect x="12" y="25" width="5" height="5" rx="1" fill="#fff"/>
+            <rect x="20" y="25" width="5" height="5" rx="1" fill="#fff" opacity="0.6"/>
+            <rect x="27" y="25" width="5" height="5" rx="1" fill="#fff" opacity="0.3"/>
+          </svg>
+          <span style={{ color: '#F4F1EA', fontWeight: 700, fontSize: '16px', letterSpacing: '-0.3px' }}>LexIndia</span>
+        </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+          <span style={{ color: '#F4F1EA', fontSize: '14px', fontWeight: 500 }}>{user.name}</span>
+          <button onClick={() => { logout(); router.push('/') }} style={{
+            background: 'transparent', border: '1px solid #2a2a2e', borderRadius: '8px',
+            padding: '6px 14px', color: '#8B8B8B', fontSize: '13px', cursor: 'pointer',
+            fontFamily: 'inherit',
+          }}>Sign out</button>
+        </div>
+      </nav>
+
+      <div style={{ display: 'flex', maxWidth: '1200px', margin: '0 auto', padding: '32px 24px', gap: '32px' }}>
+        {/* Sidebar */}
+        <div style={{ width: '220px', flexShrink: 0 }}>
+          <div style={{ position: 'sticky', top: '88px' }}>
+            {tabs.map(t => (
+              <button key={t.id} onClick={() => setTab(t.id)} style={{
+                width: '100%', padding: '10px 14px', marginBottom: '4px',
+                background: tab === t.id ? '#1a1a1e' : 'transparent',
+                border: 'none', borderRadius: '8px',
+                color: tab === t.id ? '#F4F1EA' : '#6B6B6B',
+                fontSize: '13px', fontWeight: tab === t.id ? 600 : 400,
+                cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
+                display: 'flex', alignItems: 'center', gap: '10px',
+                transition: 'all 0.15s',
+              }}>
+                <span>{t.icon}</span>{t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Main content */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+
+          {/* OVERVIEW */}
+          {tab === 'overview' && (
+            <div>
+              <h1 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px', letterSpacing: '-0.5px' }}>
+                Welcome back, {user.name.split(' ')[0]}
+              </h1>
+              <p style={{ color: '#6B6B6B', fontSize: '14px', marginBottom: '32px' }}>
+                {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+              </p>
+
+              {/* Stats */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' }}>
+                {[
+                  { label: 'Searches', value: searches.length, icon: '🔍', href: '/research' },
+                  { label: 'Drafts', value: documents.length, icon: '📄', href: '/drafts' },
+                  { label: 'Conversations', value: sessions.length, icon: '💬', href: '/assistant' },
+                ].map(stat => (
+                  <Link key={stat.label} href={stat.href} style={{ textDecoration: 'none' }}>
+                    <div style={{
+                      background: '#111113', border: '1px solid #1e1e22',
+                      borderRadius: '12px', padding: '20px',
+                      transition: 'border-color 0.2s',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.borderColor = '#3a3a3e')}
+                    onMouseLeave={e => (e.currentTarget.style.borderColor = '#1e1e22')}
+                    >
+                      <div style={{ fontSize: '22px', marginBottom: '8px' }}>{stat.icon}</div>
+                      <div style={{ fontSize: '28px', fontWeight: 700, color: '#F4F1EA' }}>{dataLoading ? '—' : stat.value}</div>
+                      <div style={{ fontSize: '13px', color: '#6B6B6B', marginTop: '4px' }}>{stat.label}</div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+
+              {/* Quick actions */}
+              <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px', color: '#8B8B8B', letterSpacing: '0.5px', textTransform: 'uppercase', fontSize: '12px' }}>Quick Actions</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '32px' }}>
+                {[
+                  { label: 'New Search', desc: 'Search Indian Kanoon', href: '/research', color: '#3b82f6' },
+                  { label: 'New Draft', desc: 'Generate legal document', href: '/drafts', color: '#10b981' },
+                  { label: 'Ask LexChat', desc: 'AI legal assistant', href: '/assistant', color: '#8b5cf6' },
+                ].map(action => (
+                  <Link key={action.label} href={action.href} style={{ textDecoration: 'none' }}>
+                    <div style={{
+                      background: '#111113', border: '1px solid #1e1e22',
+                      borderRadius: '12px', padding: '16px',
+                      transition: 'border-color 0.2s',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.borderColor = '#3a3a3e')}
+                    onMouseLeave={e => (e.currentTarget.style.borderColor = '#1e1e22')}
+                    >
+                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: action.color, marginBottom: '10px' }} />
+                      <div style={{ fontSize: '14px', fontWeight: 600, color: '#F4F1EA', marginBottom: '4px' }}>{action.label}</div>
+                      <div style={{ fontSize: '12px', color: '#6B6B6B' }}>{action.desc}</div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+
+              {/* Recent activity */}
+              <h2 style={{ fontSize: '12px', fontWeight: 600, marginBottom: '16px', color: '#8B8B8B', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Recent Activity</h2>
+              {dataLoading ? (
+                <div style={{ color: '#6B6B6B', fontSize: '14px' }}>Loading...</div>
+              ) : searches.length === 0 && documents.length === 0 ? (
+                <div style={{ background: '#111113', border: '1px solid #1e1e22', borderRadius: '12px', padding: '32px', textAlign: 'center', color: '#6B6B6B', fontSize: '14px' }}>
+                  No activity yet. Start by running a search or creating a draft.
+                </div>
+              ) : (
+                <div style={{ background: '#111113', border: '1px solid #1e1e22', borderRadius: '12px', overflow: 'hidden' }}>
+                  {[...searches.slice(0, 3).map(s => ({ type: 'search', text: s.query, date: s.created_at })),
+                    ...documents.slice(0, 3).map(d => ({ type: 'draft', text: d.title, date: d.created_at })),
+                  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5).map((item, i) => (
+                    <div key={i} style={{
+                      padding: '14px 16px', borderBottom: '1px solid #1a1a1e',
+                      display: 'flex', alignItems: 'center', gap: '12px',
+                    }}>
+                      <span style={{ fontSize: '16px' }}>{item.type === 'search' ? '🔍' : '📄'}</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '13px', color: '#F4F1EA', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.text}</div>
+                        <div style={{ fontSize: '12px', color: '#6B6B6B', marginTop: '2px' }}>{item.type === 'search' ? 'Search' : 'Draft'} · {formatDate(item.date)}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* SEARCHES */}
+          {tab === 'searches' && (
+            <div>
+              <h1 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '24px' }}>Search History</h1>
+              {dataLoading ? <div style={{ color: '#6B6B6B' }}>Loading...</div> :
+               searches.length === 0 ? <div style={{ color: '#6B6B6B', fontSize: '14px' }}>No searches yet.</div> :
+               searches.map((s, i) => (
+                <div key={i} style={{ background: '#111113', border: '1px solid #1e1e22', borderRadius: '10px', padding: '16px', marginBottom: '10px' }}>
+                  <div style={{ fontSize: '14px', color: '#F4F1EA', fontWeight: 500 }}>{s.query}</div>
+                  <div style={{ fontSize: '12px', color: '#6B6B6B', marginTop: '4px' }}>{s.module} · {formatDate(s.created_at)}</div>
+                </div>
+               ))}
+            </div>
+          )}
+
+          {/* DRAFTS */}
+          {tab === 'drafts' && (
+            <div>
+              <h1 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '24px' }}>Saved Drafts</h1>
+              {dataLoading ? <div style={{ color: '#6B6B6B' }}>Loading...</div> :
+               documents.length === 0 ? <div style={{ color: '#6B6B6B', fontSize: '14px' }}>No saved drafts yet. Go to <Link href="/drafts" style={{ color: '#F4F1EA' }}>LexDraft</Link> to generate documents.</div> :
+               documents.map((d, i) => (
+                <div key={i} style={{ background: '#111113', border: '1px solid #1e1e22', borderRadius: '10px', padding: '16px', marginBottom: '10px' }}>
+                  <div style={{ fontSize: '14px', color: '#F4F1EA', fontWeight: 500 }}>{d.title}</div>
+                  <div style={{ fontSize: '12px', color: '#6B6B6B', marginTop: '4px' }}>{d.doc_type} · {formatDate(d.created_at)}</div>
+                </div>
+               ))}
+            </div>
+          )}
+
+          {/* CHATS */}
+          {tab === 'chats' && (
+            <div>
+              <h1 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '24px' }}>Chat History</h1>
+              {dataLoading ? <div style={{ color: '#6B6B6B' }}>Loading...</div> :
+               sessions.length === 0 ? <div style={{ color: '#6B6B6B', fontSize: '14px' }}>No conversations yet. Go to <Link href="/assistant" style={{ color: '#F4F1EA' }}>LexChat</Link> to start one.</div> :
+               sessions.map((s: any, i: number) => (
+                <div key={i} style={{ background: '#111113', border: '1px solid #1e1e22', borderRadius: '10px', padding: '16px', marginBottom: '10px' }}>
+                  <div style={{ fontSize: '14px', color: '#F4F1EA', fontWeight: 500 }}>{s.title}</div>
+                  <div style={{ fontSize: '12px', color: '#6B6B6B', marginTop: '4px' }}>Last updated · {formatDate(s.updated_at)}</div>
+                </div>
+               ))}
+            </div>
+          )}
+
+          {/* USAGE */}
+          {tab === 'usage' && (
+            <div>
+              <h1 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '24px' }}>Usage & Plan</h1>
+              <div style={{ background: '#111113', border: '1px solid #1e1e22', borderRadius: '12px', padding: '24px', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                  <div>
+                    <div style={{ fontSize: '18px', fontWeight: 700, color: '#F4F1EA' }}>Free Plan</div>
+                    <div style={{ fontSize: '13px', color: '#6B6B6B', marginTop: '4px' }}>Basic access to LexIndia</div>
+                  </div>
+                  <div style={{ padding: '8px 20px', background: 'linear-gradient(135deg, rgba(199,165,106,0.15), rgba(199,165,106,0.05))', border: '1px solid rgba(199,165,106,0.3)', borderRadius: '8px', color: '#C7A56A', fontWeight: 700, fontSize: '14px', cursor: 'pointer' }}>
+                    Upgrade to Pro
+                  </div>
+                </div>
+                {[
+                  { label: 'Searches this month', used: searches.length, limit: 20 },
+                  { label: 'Drafts generated', used: documents.length, limit: 10 },
+                  { label: 'Chat conversations', used: sessions.length, limit: 15 },
+                ].map(item => (
+                  <div key={item.label} style={{ marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '13px', color: '#8B8B8B' }}>{item.label}</span>
+                      <span style={{ fontSize: '13px', color: '#F4F1EA' }}>{item.used} / {item.limit}</span>
+                    </div>
+                    <div style={{ height: '4px', background: '#1e1e22', borderRadius: '2px' }}>
+                      <div style={{ height: '100%', width: `${Math.min((item.used / item.limit) * 100, 100)}%`, background: item.used >= item.limit ? '#ef4444' : '#C7A56A', borderRadius: '2px', transition: 'width 0.5s' }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* SETTINGS */}
+          {tab === 'settings' && (
+            <div>
+              <h1 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '24px' }}>Settings</h1>
+              <div style={{ background: '#111113', border: '1px solid #1e1e22', borderRadius: '12px', padding: '24px', marginBottom: '16px' }}>
+                <h2 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '20px', color: '#F4F1EA' }}>Account</h2>
+                <div style={{ marginBottom: '16px' }}>
+                  <div style={{ fontSize: '12px', color: '#6B6B6B', marginBottom: '4px' }}>Name</div>
+                  <div style={{ fontSize: '14px', color: '#F4F1EA' }}>{user.name}</div>
+                </div>
+                <div style={{ marginBottom: '16px' }}>
+                  <div style={{ fontSize: '12px', color: '#6B6B6B', marginBottom: '4px' }}>Email</div>
+                  <div style={{ fontSize: '14px', color: '#F4F1EA' }}>{user.email}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '12px', color: '#6B6B6B', marginBottom: '4px' }}>Plan</div>
+                  <div style={{ fontSize: '14px', color: '#F4F1EA', textTransform: 'capitalize' }}>{user.plan}</div>
+                </div>
+              </div>
+              <button
+                onClick={() => { logout(); router.push('/') }}
+                style={{
+                  padding: '10px 20px', background: 'rgba(239,68,68,0.08)',
+                  border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px',
+                  color: '#ef4444', fontSize: '14px', cursor: 'pointer',
+                  fontFamily: 'inherit', fontWeight: 500,
+                }}>
+                Sign out
+              </button>
+            </div>
+          )}
+
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense>
+      <DashboardContent />
+    </Suspense>
+  )
+}
