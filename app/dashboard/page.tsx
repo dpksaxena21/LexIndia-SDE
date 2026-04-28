@@ -36,6 +36,15 @@ function DashboardContent() {
   const [documents, setDocuments] = useState<any[]>([])
   const [sessions, setSessions] = useState<any[]>([])
   const [dataLoading, setDataLoading] = useState(false)
+  const [width, setWidth] = useState(1200)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  useEffect(() => {
+    setWidth(window.innerWidth)
+    const handler = () => setWidth(window.innerWidth)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
 
   useEffect(() => {
     if (!loading && !user) router.push('/login')
@@ -58,6 +67,9 @@ function DashboardContent() {
 
   if (loading || !user) return null
 
+  const isMobile = width < 768
+  const isSmall = width < 640
+
   const tabs: { id: Tab; label: string }[] = [
     { id: 'overview', label: 'Overview' },
     { id: 'searches', label: 'Search History' },
@@ -78,8 +90,9 @@ function DashboardContent() {
         .dash-tab:hover { background: #1a1a1e !important; color: #F4F1EA !important; }
       `}</style>
 
+      {/* Navbar */}
       <nav style={{
-        borderBottom: '1px solid #1e1e22', padding: '0 32px',
+        borderBottom: '1px solid #1e1e22', padding: '0 20px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         height: '56px', position: 'sticky', top: 0, background: '#0A0A0B', zIndex: 10,
       }}>
@@ -99,65 +112,112 @@ function DashboardContent() {
           </svg>
           <span style={{ color: '#F4F1EA', fontWeight: 700, fontSize: '16px', letterSpacing: '-0.3px' }}>LexIndia</span>
         </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-          <span style={{ color: '#F4F1EA', fontSize: '14px', fontWeight: 500 }}>{user.name}</span>
-          <button onClick={() => { logout(); router.push('/') }} style={{
-            background: 'transparent', border: '1px solid #2a2a2e', borderRadius: '8px',
-            padding: '6px 14px', color: '#8B8B8B', fontSize: '13px', cursor: 'pointer',
-            fontFamily: 'inherit',
-          }}>Sign out</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {!isMobile && <span style={{ color: '#F4F1EA', fontSize: '14px', fontWeight: 500 }}>{user.name}</span>}
+          {isMobile ? (
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={{
+              background: 'transparent', border: '1px solid #2a2a2e', borderRadius: '8px',
+              padding: '6px 10px', color: '#8B8B8B', cursor: 'pointer',
+            }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+              </svg>
+            </button>
+          ) : (
+            <button onClick={() => { logout(); router.push('/') }} style={{
+              background: 'transparent', border: '1px solid #2a2a2e', borderRadius: '8px',
+              padding: '6px 14px', color: '#8B8B8B', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit',
+            }}>Sign out</button>
+          )}
         </div>
       </nav>
 
-      <div style={{ display: 'flex', maxWidth: '1200px', margin: '0 auto', padding: '32px 24px', gap: '32px' }}>
-        <div style={{ width: '220px', flexShrink: 0 }}>
-          <div style={{ position: 'sticky', top: '88px' }}>
-            {tabs.map(t => (
-              <button key={t.id} onClick={() => setTab(t.id)} className="dash-tab" style={{
-                width: '100%', padding: '10px 14px', marginBottom: '4px',
-                background: tab === t.id ? '#1a1a1e' : 'transparent',
-                border: 'none', borderRadius: '8px',
-                color: tab === t.id ? '#F4F1EA' : '#6B6B6B',
-                fontSize: '13px', fontWeight: tab === t.id ? 600 : 400,
-                cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
-                display: 'flex', alignItems: 'center', gap: '10px',
-                transition: 'all 0.15s',
-              }}>
-                <span style={{ display: 'flex', opacity: tab === t.id ? 0.9 : 0.7 }}>{tabIcons[t.id]}</span>{t.label}
-              </button>
-            ))}
-          </div>
+      {/* Mobile menu dropdown */}
+      {isMobile && mobileMenuOpen && (
+        <div style={{
+          background: '#111113', borderBottom: '1px solid #1e1e22',
+          padding: '8px 16px 16px',
+        }}>
+          {tabs.map(t => (
+            <button key={t.id} onClick={() => { setTab(t.id); setMobileMenuOpen(false) }} style={{
+              width: '100%', padding: '10px 12px', marginBottom: '2px',
+              background: tab === t.id ? '#1a1a1e' : 'transparent',
+              border: 'none', borderRadius: '8px',
+              color: tab === t.id ? '#F4F1EA' : '#6B6B6B',
+              fontSize: '14px', fontWeight: tab === t.id ? 600 : 400,
+              cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
+              display: 'flex', alignItems: 'center', gap: '10px',
+            }}>
+              <span style={{ display: 'flex', opacity: 0.7 }}>{tabIcons[t.id]}</span>{t.label}
+            </button>
+          ))}
+          <div style={{ height: '1px', background: '#1e1e22', margin: '8px 0' }} />
+          <button onClick={() => { logout(); router.push('/') }} style={{
+            width: '100%', padding: '10px 12px', background: 'transparent', border: 'none',
+            borderRadius: '8px', color: '#ef4444', fontSize: '14px', cursor: 'pointer',
+            textAlign: 'left', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '10px',
+          }}>Sign out</button>
         </div>
+      )}
 
+      <div style={{
+        display: 'flex', maxWidth: '1200px', margin: '0 auto',
+        padding: isMobile ? '20px 16px' : '32px 24px',
+        gap: '32px', flexDirection: isMobile ? 'column' : 'row',
+      }}>
+        {/* Sidebar — desktop only */}
+        {!isMobile && (
+          <div style={{ width: '220px', flexShrink: 0 }}>
+            <div style={{ position: 'sticky', top: '88px' }}>
+              {tabs.map(t => (
+                <button key={t.id} onClick={() => setTab(t.id)} className="dash-tab" style={{
+                  width: '100%', padding: '10px 14px', marginBottom: '4px',
+                  background: tab === t.id ? '#1a1a1e' : 'transparent',
+                  border: 'none', borderRadius: '8px',
+                  color: tab === t.id ? '#F4F1EA' : '#6B6B6B',
+                  fontSize: '13px', fontWeight: tab === t.id ? 600 : 400,
+                  cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
+                  display: 'flex', alignItems: 'center', gap: '10px', transition: 'all 0.15s',
+                }}>
+                  <span style={{ display: 'flex', opacity: tab === t.id ? 0.9 : 0.5 }}>{tabIcons[t.id]}</span>{t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Main content */}
         <div style={{ flex: 1, minWidth: 0, animation: 'fadeUp 0.3s ease' }}>
 
           {tab === 'overview' && (
             <div>
-              <h1 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px', letterSpacing: '-0.5px' }}>
+              <h1 style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 700, marginBottom: '8px', letterSpacing: '-0.5px' }}>
                 Welcome back, {user.name.split(' ')[0]}
               </h1>
-              <p style={{ color: '#6B6B6B', fontSize: '14px', marginBottom: '32px' }}>
+              <p style={{ color: '#6B6B6B', fontSize: '14px', marginBottom: '24px' }}>
                 {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
               </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' }}>
+              {/* Stats */}
+              <div style={{ display: 'grid', gridTemplateColumns: isSmall ? '1fr' : 'repeat(3, 1fr)', gap: '12px', marginBottom: '24px' }}>
                 {[
                   { label: 'Searches', value: searches.length, icon: tabIcons.searches, href: '/research' },
                   { label: 'Drafts', value: documents.length, icon: tabIcons.drafts, href: '/drafts' },
                   { label: 'Conversations', value: sessions.length, icon: tabIcons.chats, href: '/assistant' },
                 ].map(stat => (
                   <Link key={stat.label} href={stat.href} style={{ textDecoration: 'none' }}>
-                    <div className="dash-card" style={{ background: '#111113', border: '1px solid #1e1e22', borderRadius: '12px', padding: '20px' }}>
+                    <div className="dash-card" style={{ background: '#111113', border: '1px solid #1e1e22', borderRadius: '12px', padding: '18px' }}>
                       <div style={{ marginBottom: '8px', opacity: 0.8 }}>{stat.icon}</div>
-                      <div style={{ fontSize: '28px', fontWeight: 700, color: '#F4F1EA' }}>{dataLoading ? '—' : stat.value}</div>
+                      <div style={{ fontSize: '26px', fontWeight: 700, color: '#F4F1EA' }}>{dataLoading ? '—' : stat.value}</div>
                       <div style={{ fontSize: '13px', color: '#6B6B6B', marginTop: '4px' }}>{stat.label}</div>
                     </div>
                   </Link>
                 ))}
               </div>
 
-              <h2 style={{ fontSize: '12px', fontWeight: 600, marginBottom: '16px', color: '#8B8B8B', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Quick Actions</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '32px' }}>
+              {/* Quick actions */}
+              <h2 style={{ fontSize: '12px', fontWeight: 600, marginBottom: '12px', color: '#8B8B8B', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Quick Actions</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: isSmall ? '1fr' : 'repeat(3, 1fr)', gap: '10px', marginBottom: '28px' }}>
                 {[
                   { label: 'New Search', desc: 'Search Indian Kanoon', href: '/research', color: '#3b82f6' },
                   { label: 'New Draft', desc: 'Generate legal document', href: '/drafts', color: '#10b981' },
@@ -173,11 +233,12 @@ function DashboardContent() {
                 ))}
               </div>
 
-              <h2 style={{ fontSize: '12px', fontWeight: 600, marginBottom: '16px', color: '#8B8B8B', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Recent Activity</h2>
+              {/* Recent activity */}
+              <h2 style={{ fontSize: '12px', fontWeight: 600, marginBottom: '12px', color: '#8B8B8B', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Recent Activity</h2>
               {dataLoading ? (
                 <div style={{ color: '#6B6B6B', fontSize: '14px' }}>Loading...</div>
               ) : searches.length === 0 && documents.length === 0 ? (
-                <div style={{ background: '#111113', border: '1px solid #1e1e22', borderRadius: '12px', padding: '32px', textAlign: 'center', color: '#6B6B6B', fontSize: '14px' }}>
+                <div style={{ background: '#111113', border: '1px solid #1e1e22', borderRadius: '12px', padding: '28px', textAlign: 'center', color: '#6B6B6B', fontSize: '14px' }}>
                   No activity yet. Start by running a search or creating a draft.
                 </div>
               ) : (
@@ -244,12 +305,12 @@ function DashboardContent() {
             <div>
               <h1 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '24px' }}>Usage & Plan</h1>
               <div style={{ background: '#111113', border: '1px solid #1e1e22', borderRadius: '12px', padding: '24px', marginBottom: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', flexDirection: isMobile ? 'column' : 'row', gap: '16px', marginBottom: '20px' }}>
                   <div>
                     <div style={{ fontSize: '18px', fontWeight: 700, color: '#F4F1EA' }}>Free Plan</div>
                     <div style={{ fontSize: '13px', color: '#6B6B6B', marginTop: '4px' }}>Basic access to LexIndia</div>
                   </div>
-                  <div style={{ padding: '8px 20px', background: 'linear-gradient(135deg, rgba(199,165,106,0.15), rgba(199,165,106,0.05))', border: '1px solid rgba(199,165,106,0.3)', borderRadius: '8px', color: '#C7A56A', fontWeight: 700, fontSize: '14px', cursor: 'pointer' }}>
+                  <div style={{ padding: '8px 20px', background: 'linear-gradient(135deg, rgba(199,165,106,0.15), rgba(199,165,106,0.05))', border: '1px solid rgba(199,165,106,0.3)', borderRadius: '8px', color: '#C7A56A', fontWeight: 700, fontSize: '14px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
                     Upgrade to Pro
                   </div>
                 </div>
