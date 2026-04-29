@@ -134,12 +134,34 @@ export default function Research() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: sq }),
       })
-      const data = await res.json()
-      setResults(data)
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let aiText = ''
+      let cases: any[] = []
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        const chunk = decoder.decode(value)
+        const lines = chunk.split('
+').filter(l => l.startsWith('data: '))
+        for (const line of lines) {
+          try {
+            const json = JSON.parse(line.slice(6))
+            if (json.type === 'cases') {
+              cases = json.cases
+              setResults((prev: any) => ({ ...prev, cases, ai_summary: '' }))
+              setLoading(false)
+            } else if (json.type === 'text') {
+              aiText += json.content
+              setResults((prev: any) => ({ ...prev, cases, ai_summary: aiText }))
+            }
+          } catch {}
+        }
+      }
     } catch (e) {
-      setResults({ error: 'Could not connect to backend. Make sure the backend server is running on port 8000.' })
+      setResults({ error: 'Could not connect to backend.' })
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   const bg        = dark ? '#080809'                : '#F8F8F6'
