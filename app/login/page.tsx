@@ -94,7 +94,7 @@ export default function LoginPage() {
           display: 'flex', flexDirection: 'column', alignItems: 'center',
           marginBottom: '36px', opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease',
         }}>
-          <Link href="/" style={{ textDecoration: 'none' }}>
+          <Link href="/" style={{ textDecoration: 'none', display: 'flex', justifyContent: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
               <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
                 {logoBlocks.map((b, i) => (
