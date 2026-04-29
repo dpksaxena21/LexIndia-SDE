@@ -4,10 +4,9 @@ import { useAuth } from '../auth/AuthContext'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-export default function RegisterPage() {
-  const { register, googleLogin } = useAuth()
+export default function LoginPage() {
+  const { login, googleLogin } = useAuth()
   const router = useRouter()
-  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPass, setShowPass] = useState(false)
@@ -27,12 +26,11 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    if (password.length < 6) { setError('Password must be at least 6 characters'); return }
     setLoading(true)
-    const res = await register(email, name, password)
+    const res = await login(email, password)
     setLoading(false)
     if (res.ok) router.push('/')
-    else setError(res.error || 'Registration failed')
+    else setError(res.error || 'Login failed')
   }
 
   const logoBlocks = [
@@ -86,32 +84,43 @@ export default function RegisterPage() {
 
       <div style={{ position: 'fixed', inset: 0, zIndex: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
       <div style={{ position: 'fixed', left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(199,165,106,0.12), transparent)', zIndex: 0, animation: 'scanLine 10s linear infinite', animationDelay: '1s' }} />
-      <div style={{ position: 'fixed', top: '30%', left: '60%', width: '600px', height: '600px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,165,106,0.07) 0%, transparent 70%)', transform: 'translate(-50%,-50%)', animation: 'orbFloat 14s ease-in-out infinite', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', top: '70%', left: '35%', width: '400px', height: '400px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 70%)', transform: 'translate(-50%,-50%)', animation: 'orbFloat2 18s ease-in-out infinite', pointerEvents: 'none', zIndex: 0 }} />
+      <div style={{ position: 'fixed', top: '30%', left: '40%', width: '600px', height: '600px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,165,106,0.07) 0%, transparent 70%)', transform: 'translate(-50%,-50%)', animation: 'orbFloat 14s ease-in-out infinite', pointerEvents: 'none', zIndex: 0 }} />
+      <div style={{ position: 'fixed', top: '65%', left: '65%', width: '400px', height: '400px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 70%)', transform: 'translate(-50%,-50%)', animation: 'orbFloat2 18s ease-in-out infinite', pointerEvents: 'none', zIndex: 0 }} />
 
       <div style={{ width: '100%', maxWidth: '420px', position: 'relative', zIndex: 1 }}>
 
-        <div style={{ textAlign: 'center', marginBottom: '32px', opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease' }}>
+        {/* Logo — centered */}
+        <div style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          marginBottom: '36px', opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease',
+        }}>
           <Link href="/" style={{ textDecoration: 'none' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-              <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
                 {logoBlocks.map((b, i) => (
                   <rect key={i} x={b.x} y={b.y} width="5" height="5" rx="1"
                     fill="#ffffff" opacity={litBlocks.includes(i) ? b.baseOp : 0}
                     style={{ transition: 'opacity 0.3s ease' }} />
                 ))}
               </svg>
-              <span style={{ fontSize: '28px', fontWeight: 700, color: '#F4F1EA', letterSpacing: '-0.5px', opacity: litBlocks.length > 8 ? 1 : 0, transition: 'opacity 0.4s ease' }}>LexIndia</span>
+              <span style={{
+                fontSize: '28px', fontWeight: 700, color: '#F4F1EA', letterSpacing: '-0.5px',
+                opacity: litBlocks.length > 8 ? 1 : 0, transition: 'opacity 0.4s ease',
+              }}>LexIndia</span>
             </div>
           </Link>
-          <p style={{ color: '#2a2a2a', fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase' }}>Create your account</p>
+          <p style={{ color: '#333', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', margin: 0 }}>
+            AI Legal Research
+          </p>
         </div>
 
+        {/* Card */}
         <div style={{
           background: 'rgba(10,10,12,0.9)', backdropFilter: 'blur(24px)',
           border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', padding: '28px',
           boxShadow: '0 32px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)',
-          opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)',
+          opacity: mounted ? 1 : 0,
+          transform: mounted ? 'translateY(0)' : 'translateY(20px)',
           transition: 'opacity 0.7s ease 0.15s, transform 0.7s ease 0.15s',
         }}>
           <button onClick={googleLogin} className="lex-google" style={{
@@ -137,12 +146,6 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: '12px' }}>
-              <label style={{ display: 'block', marginBottom: '6px', fontSize: '11px', color: '#444', fontWeight: 600, letterSpacing: '0.8px' }}>FULL NAME</label>
-              <input type="text" value={name} onChange={e => setName(e.target.value)}
-                required placeholder="Adv. Sharma" className="lex-input" style={inputBase} />
-            </div>
-
-            <div style={{ marginBottom: '12px' }}>
               <label style={{ display: 'block', marginBottom: '6px', fontSize: '11px', color: '#444', fontWeight: 600, letterSpacing: '0.8px' }}>EMAIL</label>
               <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                 required placeholder="you@example.com" className="lex-input" style={inputBase} />
@@ -152,8 +155,7 @@ export default function RegisterPage() {
               <label style={{ display: 'block', marginBottom: '6px', fontSize: '11px', color: '#444', fontWeight: 600, letterSpacing: '0.8px' }}>PASSWORD</label>
               <div style={{ position: 'relative' }}>
                 <input type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
-                  required placeholder="Min 6 characters" className="lex-input"
-                  style={{ ...inputBase, paddingRight: '42px' }} />
+                  required placeholder="••••••••" className="lex-input" style={{ ...inputBase, paddingRight: '42px' }} />
                 <button type="button" className="eye-btn" onClick={() => setShowPass(!showPass)}
                   style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)' }}>
                   {showPass ? (
@@ -177,22 +179,19 @@ export default function RegisterPage() {
             )}
 
             <button type="submit" disabled={loading} className="lex-submit" style={{
-              width: '100%', padding: '12px',
-              background: loading ? '#1a1a1e' : '#F4F1EA',
-              color: loading ? '#444' : '#0A0A0B',
-              border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: 700,
-              fontFamily: "'Manrope', system-ui, sans-serif",
-              cursor: loading ? 'not-allowed' : 'pointer',
-              letterSpacing: '0.3px', transition: 'background 0.15s',
+              width: '100%', padding: '12px', background: loading ? '#1a1a1e' : '#F4F1EA',
+              color: loading ? '#444' : '#0A0A0B', border: 'none', borderRadius: '10px',
+              fontSize: '14px', fontWeight: 700, fontFamily: "'Manrope', system-ui, sans-serif",
+              cursor: loading ? 'not-allowed' : 'pointer', letterSpacing: '0.3px', transition: 'background 0.15s',
             }}>
-              {loading ? 'Creating account...' : 'Create account →'}
+              {loading ? 'Signing in...' : 'Sign in →'}
             </button>
           </form>
         </div>
 
         <p style={{ textAlign: 'center', marginTop: '20px', color: '#2a2a2a', fontSize: '13px', opacity: mounted ? 1 : 0, transition: 'opacity 0.8s ease 0.3s' }}>
-          Already have an account?{' '}
-          <Link href="/login" style={{ color: '#6B6B6B', textDecoration: 'none', fontWeight: 500 }}>Sign in</Link>
+          Don&apos;t have an account?{' '}
+          <Link href="/register" style={{ color: '#6B6B6B', textDecoration: 'none', fontWeight: 500 }}>Create one</Link>
         </p>
       </div>
     </div>

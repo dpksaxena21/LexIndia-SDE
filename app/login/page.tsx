@@ -82,44 +82,36 @@ export default function LoginPage() {
         .eye-btn:hover { color: #8B8B8B; }
       `}</style>
 
-      {/* Grid */}
-      <div style={{
-        position: 'fixed', inset: 0, zIndex: 0,
-        backgroundImage: 'linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)',
-        backgroundSize: '48px 48px',
-      }} />
-
-      {/* Scan line */}
-      <div style={{
-        position: 'fixed', left: 0, right: 0, height: '1px',
-        background: 'linear-gradient(90deg, transparent, rgba(199,165,106,0.12), transparent)',
-        zIndex: 0, animation: 'scanLine 10s linear infinite', animationDelay: '1s',
-      }} />
-
-      {/* Orbs */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
+      <div style={{ position: 'fixed', left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(199,165,106,0.12), transparent)', zIndex: 0, animation: 'scanLine 10s linear infinite', animationDelay: '1s' }} />
       <div style={{ position: 'fixed', top: '30%', left: '40%', width: '600px', height: '600px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,165,106,0.07) 0%, transparent 70%)', transform: 'translate(-50%,-50%)', animation: 'orbFloat 14s ease-in-out infinite', pointerEvents: 'none', zIndex: 0 }} />
       <div style={{ position: 'fixed', top: '65%', left: '65%', width: '400px', height: '400px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 70%)', transform: 'translate(-50%,-50%)', animation: 'orbFloat2 18s ease-in-out infinite', pointerEvents: 'none', zIndex: 0 }} />
 
-      {/* Content */}
       <div style={{ width: '100%', maxWidth: '420px', position: 'relative', zIndex: 1 }}>
 
-        {/* Animated Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '36px', opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease' }}>
+        {/* Logo — centered */}
+        <div style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          marginBottom: '36px', opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease',
+        }}>
           <Link href="/" style={{ textDecoration: 'none' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-              <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
                 {logoBlocks.map((b, i) => (
                   <rect key={i} x={b.x} y={b.y} width="5" height="5" rx="1"
-                    fill="#ffffff"
-                    opacity={litBlocks.includes(i) ? b.baseOp : 0}
-                    style={{ transition: 'opacity 0.3s ease' }}
-                  />
+                    fill="#ffffff" opacity={litBlocks.includes(i) ? b.baseOp : 0}
+                    style={{ transition: 'opacity 0.3s ease' }} />
                 ))}
               </svg>
-              <span style={{ fontSize: '28px', fontWeight: 700, color: '#F4F1EA', letterSpacing: '-0.5px', opacity: litBlocks.length > 8 ? 1 : 0, transition: 'opacity 0.4s ease' }}>LexIndia</span>
+              <span style={{
+                fontSize: '28px', fontWeight: 700, color: '#F4F1EA', letterSpacing: '-0.5px',
+                opacity: litBlocks.length > 8 ? 1 : 0, transition: 'opacity 0.4s ease',
+              }}>LexIndia</span>
             </div>
           </Link>
-          <p style={{ color: '#2a2a2a', fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase' }}>AI Legal Research</p>
+          <p style={{ color: '#333', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', margin: 0 }}>
+            AI Legal Research
+          </p>
         </div>
 
         {/* Card */}
@@ -132,14 +124,10 @@ export default function LoginPage() {
           transition: 'opacity 0.7s ease 0.15s, transform 0.7s ease 0.15s',
         }}>
           <button onClick={googleLogin} className="lex-google" style={{
-            width: '100%', padding: '11px',
-            background: '#fff', border: '1px solid rgba(0,0,0,0.08)',
-            borderRadius: '10px', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-            fontSize: '14px', fontWeight: 600, color: '#1a1a1a',
-            fontFamily: "'Manrope', system-ui, sans-serif",
-            marginBottom: '18px', transition: 'background 0.15s',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            width: '100%', padding: '11px', background: '#fff', border: '1px solid rgba(0,0,0,0.08)',
+            borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+            fontSize: '14px', fontWeight: 600, color: '#1a1a1a', fontFamily: "'Manrope', system-ui, sans-serif",
+            marginBottom: '18px', transition: 'background 0.15s', boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
           }}>
             <svg width="18" height="18" viewBox="0 0 48 48">
               <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -167,8 +155,7 @@ export default function LoginPage() {
               <label style={{ display: 'block', marginBottom: '6px', fontSize: '11px', color: '#444', fontWeight: 600, letterSpacing: '0.8px' }}>PASSWORD</label>
               <div style={{ position: 'relative' }}>
                 <input type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
-                  required placeholder="••••••••" className="lex-input"
-                  style={{ ...inputBase, paddingRight: '42px' }} />
+                  required placeholder="••••••••" className="lex-input" style={{ ...inputBase, paddingRight: '42px' }} />
                 <button type="button" className="eye-btn" onClick={() => setShowPass(!showPass)}
                   style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)' }}>
                   {showPass ? (
@@ -192,14 +179,10 @@ export default function LoginPage() {
             )}
 
             <button type="submit" disabled={loading} className="lex-submit" style={{
-              width: '100%', padding: '12px',
-              background: loading ? '#1a1a1e' : '#F4F1EA',
-              color: loading ? '#444' : '#0A0A0B',
-              border: 'none', borderRadius: '10px',
-              fontSize: '14px', fontWeight: 700,
-              fontFamily: "'Manrope', system-ui, sans-serif",
-              cursor: loading ? 'not-allowed' : 'pointer',
-              letterSpacing: '0.3px', transition: 'background 0.15s',
+              width: '100%', padding: '12px', background: loading ? '#1a1a1e' : '#F4F1EA',
+              color: loading ? '#444' : '#0A0A0B', border: 'none', borderRadius: '10px',
+              fontSize: '14px', fontWeight: 700, fontFamily: "'Manrope', system-ui, sans-serif",
+              cursor: loading ? 'not-allowed' : 'pointer', letterSpacing: '0.3px', transition: 'background 0.15s',
             }}>
               {loading ? 'Signing in...' : 'Sign in →'}
             </button>
