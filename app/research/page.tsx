@@ -151,6 +151,8 @@ export default function Research() {
               cases = json.cases
               setResults((prev: any) => ({ ...prev, cases, ai_summary: '' }))
               setLoading(false)
+            } else if (json.type === 'done') {
+              setLoading(false)
             } else if (json.type === 'text') {
               aiText += json.content
               setResults((prev: any) => ({ ...prev, cases, ai_summary: aiText }))
