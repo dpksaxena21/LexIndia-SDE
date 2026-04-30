@@ -108,8 +108,8 @@ function renderMarkdown(text: string) {
 }
 
 export default function Drafts() {
-  const [winW, setWinW] = React.useState(1200)
-  React.useEffect(() => { setWinW(window.innerWidth); const h = () => setWinW(window.innerWidth); window.addEventListener('resize',h); return () => window.removeEventListener('resize',h) }, [])
+  const [winW, setWinW] = useState(1200)
+  useEffect(() => { setWinW(window.innerWidth); const h = () => setWinW(window.innerWidth); window.addEventListener('resize',h); return () => window.removeEventListener('resize',h) }, [])
   const { token } = useAuth()
   const [dark, setDark] = useState(true)
   const [category, setCategory] = useState('Criminal')
