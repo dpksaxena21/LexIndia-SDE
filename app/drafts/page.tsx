@@ -1,6 +1,6 @@
 'use client'
 import { useAuth } from '../auth/AuthContext'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 function LogoMark({ size = 32, color = '#ffffff' }: { size?: number; color?: string }) {
   return (
