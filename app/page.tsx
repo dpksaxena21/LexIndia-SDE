@@ -555,17 +555,20 @@ export default function Home() {
           {/* FOOTER */}
           <footer style={{
             borderTop: `1px solid ${border}`,
-            padding: '28px 40px',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: winW < 640 ? '20px 16px' : '28px 40px',
+            display: 'flex', alignItems: 'center',
+            justifyContent: winW < 640 ? 'center' : 'space-between',
+            flexDirection: winW < 640 ? 'column' : 'row',
+            gap: winW < 640 ? 12 : 0,
             transition: 'border-color 0.3s',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <LogoMark size={20} color={logoColor} />
               <span style={{ fontSize: 12, color: textDim, letterSpacing: 2, transition:'color 0.3s' }}>LEXINDIA</span>
             </div>
-            <span style={{ fontSize: 11, color: textDim, letterSpacing: 1, transition:'color 0.3s' }}>
+            {winW >= 640 && <span style={{ fontSize: 11, color: textDim, letterSpacing: 1, transition:'color 0.3s' }}>
               LAW · TECHNOLOGY · INTELLIGENCE · TRUST · INDIA
-            </span>
+            </span>}
             <span style={{ fontSize: 11, color: textDim, transition:'color 0.3s' }}>
               Built by Deepak Saxena
             </span>
