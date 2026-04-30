@@ -85,6 +85,12 @@ export default function Research() {
   const [saved, setSaved] = useState(false)
   const [dark, setDark] = useState(true)
   const [typed, setTyped] = useState('')
+  const [winW, setWinW] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200)
+  useEffect(() => {
+    const handleResize = () => setWinW(window.innerWidth)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
   const typeRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const placeholders = [
