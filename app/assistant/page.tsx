@@ -354,8 +354,18 @@ export default function Assistant() {
                         <div>
                           <div style={{ fontSize:14, color:tm, lineHeight:1.85 }} dangerouslySetInnerHTML={{ __html: renderMarkdown(m.content, dark) }}/>
                           {/* Copy button — only on completed assistant messages */}
-                          <div style={{ display:'flex', justifyContent:'flex-end', marginTop:8 }}>
+                          <div style={{ display:'flex', justifyContent:'flex-end', gap:8, marginTop:8 }}>
                             <CopyButton text={m.content} dark={dark}/>
+                            {token && <button onClick={async () => {
+                              try {
+                                const res = await fetch('https://lexindia-backend-production.up.railway.app/api/vault/save', {
+                                  method:'POST',
+                                  headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
+                                  body:JSON.stringify({title:'Chat: '+m.content.slice(0,50), content:m.content, doc_type:'LexChat'})
+                                })
+                                if(res.ok) alert('Saved to Vault')
+                              } catch {}
+                            }} style={{ background:'transparent', border:`1px solid ${border}`, borderRadius:8, padding:'4px 10px', cursor:'pointer', fontSize:11, color:td, fontFamily:'inherit' }}>Save</button>}
                           </div>
                         </div>
                       )}
