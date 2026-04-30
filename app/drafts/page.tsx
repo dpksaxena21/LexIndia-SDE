@@ -108,6 +108,8 @@ function renderMarkdown(text: string) {
 }
 
 export default function Drafts() {
+  const [winW, setWinW] = React.useState(1200)
+  React.useEffect(() => { setWinW(window.innerWidth); const h = () => setWinW(window.innerWidth); window.addEventListener('resize',h); return () => window.removeEventListener('resize',h) }, [])
   const { token } = useAuth()
   const [dark, setDark] = useState(true)
   const [category, setCategory] = useState('Criminal')
@@ -203,7 +205,7 @@ export default function Drafts() {
       `}</style>
 
       {/* NAVBAR */}
-      <nav style={{ borderBottom: `1px solid ${border}`, padding: '12px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 10, background: navBg, backdropFilter: 'blur(12px)', transition: 'background 0.3s' }}>
+      <nav style={{ borderBottom: `1px solid ${border}`, padding: winW < 640 ? '12px 16px' : '12px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 10, background: navBg, backdropFilter: 'blur(12px)', transition: 'background 0.3s' }}>
         <button onClick={() => window.location.href = '/'} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer' }}>
           <LogoMark size={28} color={logoColor}/>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
@@ -232,7 +234,7 @@ export default function Drafts() {
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: winW < 768 ? '1fr' : '320px 1fr', gap: 20 }}>
 
           {/* LEFT — FORM */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -289,7 +291,7 @@ export default function Drafts() {
                 {docType}
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: winW < 640 ? '1fr' : '1fr 1fr', gap: 12, marginBottom: 12 }}>
                 <div>
                   <label style={labelStyle}>Court Name</label>
                   <input value={court} onChange={e => setCourt(e.target.value)} placeholder="e.g. High Court of Delhi" style={inputStyle}
