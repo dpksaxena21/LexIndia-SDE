@@ -409,7 +409,7 @@ export default function Research() {
               </div>
               <div
                 style={{ fontSize:14, color:tm, lineHeight:1.85 }}
-                dangerouslySetInnerHTML={{ __html: renderMarkdown(results.ai_summary || '', dark) }}
+                className={loading ? 'streaming-cursor' : ''} dangerouslySetInnerHTML={{ __html: renderMarkdown(results.ai_summary || '', dark) }}
               />
 
               {results.cases?.[activeCase] && (
