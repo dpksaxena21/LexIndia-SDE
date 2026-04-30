@@ -107,6 +107,7 @@ function renderMarkdown(text: string) {
 }
 
 export default function Drafts() {
+  const { token } = useAuth()
   const [dark, setDark] = useState(true)
   const [category, setCategory] = useState('Criminal')
   const [docType, setDocType] = useState(DOC_TYPES['Criminal'][0])

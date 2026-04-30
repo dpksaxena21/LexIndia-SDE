@@ -76,6 +76,7 @@ function renderMarkdown(text: string, dark: boolean) {
 }
 
 export default function Research() {
+  const { token } = useAuth()
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [results, setResults] = useState<any>(null)
@@ -131,7 +132,7 @@ export default function Research() {
     try {
       const res = await fetch('https://lexindia-backend-production.up.railway.app/api/search', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
         body: JSON.stringify({ query: sq }),
       })
       if (!res.ok || !res.body) throw new Error('Backend error')

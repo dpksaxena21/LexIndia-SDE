@@ -192,6 +192,7 @@ function FollowUpChips({ chips, onSelect, dark }: { chips: string[]; onSelect: (
 }
 
 export default function Assistant() {
+  const { token } = useAuth()
   const [messages, setMessages] = useState<Message[]>([])
   const [streamingIndex, setStreamingIndex] = useState<number | null>(null)
   const [input, setInput] = useState('')
@@ -224,7 +225,7 @@ export default function Assistant() {
     try {
       const res = await fetch('https://lexindia-backend-production.up.railway.app/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
         body: JSON.stringify({ message: msg, history: messages.map(m => ({ role: m.role, content: m.content })) }),
       })
       const data = await res.json()
