@@ -462,7 +462,19 @@ export default function Research() {
               </div>
 
               <button
-                onClick={() => setSaved(true)}
+                onClick={async () => {
+                  if (!token) { alert('Please sign in to save to vault'); return }
+                  if (!results?.ai_summary) return
+                  try {
+                    const res = await fetch('https://lexindia-backend-production.up.railway.app/api/vault/save', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                      body: JSON.stringify({ title: query, content: results.ai_summary, doc_type: 'LexSearch' })
+                    })
+                    if (res.ok) setSaved(true)
+                    else alert('Failed to save')
+                  } catch { alert('Network error') }
+                }}
                 style={{
                   width:'100%', marginBottom:6,
                   background: saved ? 'rgba(63,185,80,0.1)' : abg,
