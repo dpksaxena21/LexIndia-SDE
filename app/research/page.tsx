@@ -332,7 +332,7 @@ export default function Research() {
 
         {/* RESULTS */}
         {results && !results.error && (
-          <div style={{ display:'grid', gridTemplateColumns:'260px 1fr 220px', gap:16, paddingTop:24, paddingBottom:40 }}>
+          <div style={{ display:'grid', gridTemplateColumns: winW < 768 ? '1fr' : '260px 1fr 220px', gap:16, paddingTop:24, paddingBottom:40 }}>
 
             {/* LEFT — Cases */}
             <div>
