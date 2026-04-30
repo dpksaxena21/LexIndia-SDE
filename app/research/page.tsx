@@ -134,6 +134,7 @@ export default function Research() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: sq }),
       })
+      if (!res.ok || !res.body) throw new Error('Backend error')
       const reader = res.body.getReader()
       const decoder = new TextDecoder()
       let aiText = ''
