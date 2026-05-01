@@ -99,7 +99,13 @@ function renderMarkdown(text: string) {
     .replace(/^# (.+)$/gm, '<h1 style="font-size:18px;font-weight:800;color:#fff;margin:16px 0 8px;letter-spacing:-0.5px;">$1</h1>')
     .replace(/^## (.+)$/gm, '<h2 style="font-size:15px;font-weight:700;color:#fff;margin:14px 0 6px;">$1</h2>')
     .replace(/^### (.+)$/gm, '<h3 style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);margin:10px 0 4px;letter-spacing:0.5px;text-transform:uppercase;">$1</h3>')
+    .replace(/^#### (.+)$/gm, '<h4 style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.5);margin:8px 0 4px;letter-spacing:0.8px;text-transform:uppercase;">$1</h4>')
     .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#fff;font-weight:700;">$1</strong>')
+    .replace(/^\| (.+) \|$/gm, (match: string) => {
+      const cells = match.split('|').filter((c: string) => c.trim())
+      return `<div style="display:flex;border-bottom:1px solid rgba(255,255,255,0.06);padding:7px 0;">${cells.map((c: string) => `<div style="flex:1;font-size:12px;color:rgba(255,255,255,0.75);padding:0 8px;line-height:1.6;">${c.trim()}</div>`).join('')}</div>`
+    })
+    .replace(/^\|[-| ]+\|$/gm, '')
     .replace(/^- (.+)$/gm, '<div style="display:flex;gap:8px;margin:3px 0;"><span style="color:rgba(255,255,255,0.3);font-size:10px;margin-top:3px;">▸</span><span style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.6;">$1</span></div>')
     .replace(/^(\d+)\. (.+)$/gm, '<div style="display:flex;gap:8px;margin:3px 0;"><span style="color:rgba(255,255,255,0.4);font-size:12px;min-width:16px;">$1.</span><span style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.6;">$2</span></div>')
     .replace(/^(═+)$/gm, '<div style="height:1px;background:rgba(255,255,255,0.1);margin:12px 0;"></div>')
