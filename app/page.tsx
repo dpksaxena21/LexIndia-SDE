@@ -291,6 +291,7 @@ const MODULE_PATHS: Record<string, string> = {
   LexSearch: '/research',
   LexChat: '/assistant',
   LexDraft: '/drafts',
+  LexScan: '/scan',
 }
 
 const modules = [
