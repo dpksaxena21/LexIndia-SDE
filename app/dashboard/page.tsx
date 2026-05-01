@@ -297,7 +297,7 @@ function DashboardContent() {
                     onChange={async (e) => {
                       const file = e.target.files?.[0]
                       if (!file) return
-                      const token = localStorage.getItem('lexindia_token')
+                      const token = localStorage.getItem('lex_token')
                       const formData = new FormData()
                       formData.append('file', file)
                       formData.append('title', file.name)
@@ -343,7 +343,7 @@ function DashboardContent() {
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
                     {v.source === 'file' && (
                       <button onClick={async () => {
-                        const token = localStorage.getItem('lexindia_token')
+                        const token = localStorage.getItem('lex_token')
                         const res = await fetch(`${API}/api/vault/file/${v.id}`, { headers: { Authorization: `Bearer ${token}` } })
                         const data = await res.json()
                         if (data.url) window.open(data.url, '_blank')
