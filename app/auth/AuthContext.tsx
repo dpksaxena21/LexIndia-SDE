@@ -29,10 +29,20 @@ const AuthContext = createContext<AuthCtx>({
   logout: () => {},
 })
 
+// Wake backend on app load to avoid cold start delays
+function wakeBackend() {
+  fetch(`${API}/ping`).catch(() => {})
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+
+  // Wake backend immediately on load
+  useEffect(() => {
+    wakeBackend()
+  }, [])
 
   // Load Google Identity Services script
   useEffect(() => {
@@ -40,7 +50,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     script.src = 'https://accounts.google.com/gsi/client'
     script.async = true
     document.head.appendChild(script)
-    return () => { document.head.removeChild(script) }
+    return () => {
+      try { document.head.removeChild(script) } catch {}
+    }
   }, [])
 
   // Restore session
@@ -83,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       saveSession(await res.json())
       return { ok: true }
     } catch {
-      return { ok: false, error: 'Network error' }
+      return { ok: false, error: 'Server is starting up, please try again in 10 seconds.' }
     }
   }
 
@@ -101,21 +113,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       saveSession(await res.json())
       return { ok: true }
     } catch {
-      return { ok: false, error: 'Network error' }
+      return { ok: false, error: 'Server is starting up, please try again in 10 seconds.' }
     }
   }
 
   const googleLogin = () => {
     // @ts-ignore
     if (!window.google) {
-      alert('Google login is loading, please try again in a moment.')
+      alert('Google login is loading, please wait a moment and try again.')
       return
     }
     // @ts-ignore
     const client = window.google.accounts.oauth2.initTokenClient({
       client_id: GOOGLE_CLIENT_ID,
       scope: 'email profile',
-      callback: async (response: { access_token: string }) => {
+      callback: async (response: { access_token: string; error?: string }) => {
+        if (response.error) {
+          // User cancelled or popup blocked — silently ignore
+          return
+        }
         if (!response.access_token) return
         try {
           const res = await fetch(`${API}/api/auth/google`, {
@@ -125,17 +141,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           })
           if (!res.ok) {
             const err = await res.json()
-            alert(err.detail || 'Google login failed')
+            alert(err.detail || 'Google login failed. Please try email login instead.')
             return
           }
           saveSession(await res.json())
           window.location.href = '/'
         } catch {
-          alert('Network error during Google login')
+          alert('Could not connect to server. Please check your connection and try again.')
         }
       },
     })
-    client.requestAccessToken()
+    client.requestAccessToken({ prompt: 'select_account' })
   }
 
   const logout = () => {
