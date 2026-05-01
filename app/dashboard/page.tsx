@@ -287,11 +287,48 @@ function DashboardContent() {
           {tab === 'vault' && (
             <div>
               <h1 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '8px' }}>LexVault</h1>
-              <p style={{ color: '#6B6B6B', fontSize: '14px', marginBottom: '24px' }}>Saved research, analyses and chat responses.</p>
+              <p style={{ color: '#6B6B6B', fontSize: '14px', marginBottom: '24px' }}>Saved research, analyses, chat responses and uploaded files.</p>
+
+              {/* Upload Box */}
+              <div style={{ background: '#111113', border: '1px dashed #2e2e35', borderRadius: '12px', padding: '24px', marginBottom: '24px', textAlign: 'center' }}>
+                <div style={{ fontSize: '13px', color: '#6B6B6B', marginBottom: '12px' }}>Upload PDF, DOCX, or image files to your vault</div>
+                <label style={{ cursor: 'pointer', display: 'inline-block' }}>
+                  <input type="file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt" style={{ display: 'none' }}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0]
+                      if (!file) return
+                      const token = localStorage.getItem('lexindia_token')
+                      const formData = new FormData()
+                      formData.append('file', file)
+                      formData.append('title', file.name)
+                      try {
+                        const res = await fetch(`${API}/api/vault/upload`, {
+                          method: 'POST',
+                          headers: { Authorization: `Bearer ${token}` },
+                          body: formData,
+                        })
+                        const data = await res.json()
+                        if (data.ok) {
+                          setVault(prev => [{ id: data.id, title: file.name, source: 'file', created_at: new Date().toISOString() }, ...prev])
+                        } else {
+                          alert('Upload failed: ' + (data.detail || 'Unknown error'))
+                        }
+                      } catch (err) {
+                        alert('Upload failed')
+                      }
+                      e.target.value = ''
+                    }}
+                  />
+                  <span style={{ background: 'rgba(199,165,106,0.12)', color: '#C7A56A', border: '1px solid rgba(199,165,106,0.25)', borderRadius: '8px', padding: '8px 20px', fontSize: '13px', fontWeight: 500 }}>
+                    + Upload File
+                  </span>
+                </label>
+              </div>
+
               {dataLoading ? <div style={{ color: '#6B6B6B' }}>Loading...</div> :
                vault.length === 0 ? (
                 <div style={{ background: '#111113', border: '1px solid #1e1e22', borderRadius: '12px', padding: '32px', textAlign: 'center', color: '#6B6B6B', fontSize: '14px' }}>
-                  Nothing saved yet. Use the "Save to Vault" button in Research or Assistant pages.
+                  Nothing saved yet. Use the "Save to Vault" button in Research or Assistant pages, or upload a file above.
                 </div>
                ) :
                vault.map((v, i) => (
@@ -303,13 +340,30 @@ function DashboardContent() {
                       {formatDate(v.created_at)}
                     </div>
                   </div>
-                  <button onClick={() => deleteVaultItem(v.id)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#4a4a4a', padding: '4px', flexShrink: 0, transition: 'color 0.15s' }}
-                    onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
-                    onMouseLeave={e => e.currentTarget.style.color = '#4a4a4a'}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                      <polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14a2,2,0,0,1-2,2H8a2,2,0,0,1-2-2L5,6"/><path d="M10,11v6"/><path d="M14,11v6"/><path d="M9,6V4a1,1,0,0,1,1-1h4a1,1,0,0,1,1,1V6"/>
-                    </svg>
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
+                    {v.source === 'file' && (
+                      <button onClick={async () => {
+                        const token = localStorage.getItem('lexindia_token')
+                        const res = await fetch(`${API}/api/vault/file/${v.id}`, { headers: { Authorization: `Bearer ${token}` } })
+                        const data = await res.json()
+                        if (data.url) window.open(data.url, '_blank')
+                      }} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#4a4a4a', padding: '4px', transition: 'color 0.15s' }}
+                        onMouseEnter={e => e.currentTarget.style.color = '#C7A56A'}
+                        onMouseLeave={e => e.currentTarget.style.color = '#4a4a4a'}
+                        title="Download file">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                      </button>
+                    )}
+                    <button onClick={() => deleteVaultItem(v.id)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#4a4a4a', padding: '4px', transition: 'color 0.15s' }}
+                      onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
+                      onMouseLeave={e => e.currentTarget.style.color = '#4a4a4a'}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                        <polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14a2,2,0,0,1-2,2H8a2,2,0,0,1-2-2L5,6"/><path d="M10,11v6"/><path d="M14,11v6"/><path d="M9,6V4a1,1,0,0,1,1-1h4a1,1,0,0,1,1,1V6"/>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
                ))}
             </div>
