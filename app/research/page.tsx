@@ -456,7 +456,7 @@ export default function Research() {
             </div>
 
             {/* RIGHT — Actions */}
-            <div style={{ position:'sticky', top:72 }}>
+            <div style={{ position: winW < 768 ? 'relative' : 'sticky', top: winW < 768 ? 0 : 72 }}>
               <div style={{ fontSize:9, letterSpacing:2, color:td, marginBottom:10, textTransform:'uppercase' }}>
                 Actions
               </div>
