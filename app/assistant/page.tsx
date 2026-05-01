@@ -40,21 +40,38 @@ function renderMarkdown(text: string, dark: boolean) {
   const c1 = dark ? '#ffffff' : '#0a0a0b'
   const c2 = dark ? 'rgba(255,255,255,0.82)' : 'rgba(0,0,0,0.82)'
   const c3 = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'
+  const c4 = dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'
   const bl = dark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)'
+
+  // Process tables into proper HTML
+  text = text.replace(/((?:^\|.+\|\n?)+)/gm, (block) => {
+    const rows = block.trim().split('\n').filter(r => r.trim())
+    let html = `<div style="overflow-x:auto;margin:16px 0;"><table style="width:100%;border-collapse:collapse;font-size:13px;">`
+    let isFirst = true
+    for (const row of rows) {
+      if (/^\|[-| :]+\|$/.test(row.trim())) continue
+      const cells = row.split('|').filter(c => c.trim())
+      if (isFirst) {
+        html += `<thead><tr>${cells.map(c => `<th style="padding:8px 12px;text-align:left;border-bottom:2px solid rgba(255,255,255,0.12);color:#fff;font-weight:600;font-size:12px;letter-spacing:0.3px;white-space:nowrap;">${c.trim()}</th>`).join('')}</tr></thead><tbody>`
+        isFirst = false
+      } else {
+        html += `<tr>${cells.map(c => `<td style="padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,0.82);line-height:1.6;vertical-align:top;">${c.trim()}</td>`).join('')}</tr>`
+      }
+    }
+    html += `</tbody></table></div>`
+    return html
+  })
+
   return text
-    .replace(/^#### (.+)$/gm, `<h4 style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.45);margin:10px 0 5px;letter-spacing:0.8px;text-transform:uppercase;">$1</h4>`)
-    .replace(/^### (.+)$/gm, `<h3 style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);margin:16px 0 7px;letter-spacing:1px;text-transform:uppercase;">$1</h3>`)
+    .replace(/^#### (.+)$/gm, `<h4 style="font-size:11px;font-weight:600;color:${c4};margin:16px 0 6px;letter-spacing:0.8px;text-transform:uppercase;">$1</h4>`)
+    .replace(/^### (.+)$/gm, `<h3 style="font-size:12px;font-weight:700;color:${c4};margin:20px 0 8px;letter-spacing:1px;text-transform:uppercase;">$1</h3>`)
     .replace(/^## (.+)$/gm, `<h2 style="font-size:15px;font-weight:700;color:${c1};margin:20px 0 8px;letter-spacing:-0.3px;border-bottom:1px solid ${c3};padding-bottom:6px;">$1</h2>`)
     .replace(/^# (.+)$/gm, `<h1 style="font-size:18px;font-weight:800;color:${c1};margin:0 0 12px;">$1</h1>`)
     .replace(/\*\*(.+?)\*\*/g, `<strong style="color:${c1};font-weight:700;">$1</strong>`)
     .replace(/\*(.+?)\*/g, `<em style="color:${c2};">$1</em>`)
-    .replace(/^- (.+)$/gm, `<div style="display:flex;gap:8px;margin:5px 0;align-items:flex-start;"><span style="color:${bl};font-size:10px;margin-top:4px;">▸</span><span style="font-size:14px;color:${c2};line-height:1.7;">$1</span></div>`)
+    .replace(/^- (.+)$/gm, `<div style="display:flex;gap:8px;margin:5px 0;align-items:flex-start;"><span style="color:${bl};font-size:9px;margin-top:5px;">&#9658;</span><span style="font-size:14px;color:${c2};line-height:1.7;">$1</span></div>`)
+    .replace(/^(\d+)\. (.+)$/gm, `<div style="display:flex;gap:8px;margin:5px 0;align-items:flex-start;"><span style="color:${c4};font-size:12px;min-width:18px;font-weight:600;">$1.</span><span style="font-size:14px;color:${c2};line-height:1.7;">$2</span></div>`)
     .replace(/\n\n/g, `<div style="height:8px"></div>`)
-    .replace(/^\| (.+) \|$/gm, (match: string) => {
-      const cells = match.split('|').filter((c: string) => c.trim())
-      return `<div style="display:flex;border-bottom:1px solid rgba(255,255,255,0.06);padding:7px 0;">${cells.map((c: string) => `<div style="flex:1;font-size:13px;color:rgba(255,255,255,0.75);padding:0 8px;line-height:1.6;">${c.trim()}</div>`).join('')}</div>`
-    })
-    .replace(/^\|[-| ]+\|$/gm, '')
 }
 
 function extractChips(content: string): string[] {
