@@ -42,12 +42,19 @@ function renderMarkdown(text: string, dark: boolean) {
   const c3 = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'
   const bl = dark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)'
   return text
+    .replace(/^#### (.+)$/gm, `<h4 style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.45);margin:10px 0 5px;letter-spacing:0.8px;text-transform:uppercase;">$1</h4>`)
+    .replace(/^### (.+)$/gm, `<h3 style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);margin:16px 0 7px;letter-spacing:1px;text-transform:uppercase;">$1</h3>`)
     .replace(/^## (.+)$/gm, `<h2 style="font-size:15px;font-weight:700;color:${c1};margin:20px 0 8px;letter-spacing:-0.3px;border-bottom:1px solid ${c3};padding-bottom:6px;">$1</h2>`)
     .replace(/^# (.+)$/gm, `<h1 style="font-size:18px;font-weight:800;color:${c1};margin:0 0 12px;">$1</h1>`)
     .replace(/\*\*(.+?)\*\*/g, `<strong style="color:${c1};font-weight:700;">$1</strong>`)
     .replace(/\*(.+?)\*/g, `<em style="color:${c2};">$1</em>`)
     .replace(/^- (.+)$/gm, `<div style="display:flex;gap:8px;margin:5px 0;align-items:flex-start;"><span style="color:${bl};font-size:10px;margin-top:4px;">▸</span><span style="font-size:14px;color:${c2};line-height:1.7;">$1</span></div>`)
     .replace(/\n\n/g, `<div style="height:8px"></div>`)
+    .replace(/^\| (.+) \|$/gm, (match: string) => {
+      const cells = match.split('|').filter((c: string) => c.trim())
+      return `<div style="display:flex;border-bottom:1px solid rgba(255,255,255,0.06);padding:7px 0;">${cells.map((c: string) => `<div style="flex:1;font-size:13px;color:rgba(255,255,255,0.75);padding:0 8px;line-height:1.6;">${c.trim()}</div>`).join('')}</div>`
+    })
+    .replace(/^\|[-| ]+\|$/gm, '')
 }
 
 function extractChips(content: string): string[] {
