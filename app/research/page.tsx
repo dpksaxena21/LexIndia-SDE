@@ -61,19 +61,35 @@ function renderMarkdown(text: string, dark: boolean) {
   const c3 = dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'
   const c4 = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'
   const bl = dark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)'
+
+  // Process tables first — group rows into proper <table>
+  text = text.replace(/((?:^\|.+\|\n?)+)/gm, (block) => {
+    const rows = block.trim().split('\n').filter(r => r.trim())
+    let html = `<div style="overflow-x:auto;margin:16px 0;"><table style="width:100%;border-collapse:collapse;font-size:13px;">`
+    let isFirst = true
+    for (const row of rows) {
+      if (/^\|[-| :]+\|$/.test(row.trim())) continue
+      const cells = row.split('|').filter(c => c.trim())
+      if (isFirst) {
+        html += `<thead><tr>${cells.map(c => `<th style="padding:8px 12px;text-align:left;border-bottom:2px solid ${c4};color:${c1};font-weight:600;font-size:12px;letter-spacing:0.3px;white-space:nowrap;">${c.trim()}</th>`).join('')}</tr></thead><tbody>`
+        isFirst = false
+      } else {
+        html += `<tr>${cells.map(c => `<td style="padding:8px 12px;border-bottom:1px solid ${c4};color:${c2};line-height:1.6;vertical-align:top;">${c.trim()}</td>`).join('')}</tr>`
+      }
+    }
+    html += `</tbody></table></div>`
+    return html
+  })
+
   return text
-    .replace(/^#### (.+)$/gm, `<h4 style="font-size:11px;font-weight:600;color:${c3};margin:12px 0 6px;letter-spacing:0.8px;text-transform:uppercase;">$1</h4>`)
-    .replace(/^### (.+)$/gm, `<h3 style="font-size:11px;font-weight:700;color:${c3};margin:20px 0 8px;letter-spacing:1.5px;text-transform:uppercase;">$1</h3>`)
+    .replace(/^#### (.+)$/gm, `<h4 style="font-size:11px;font-weight:600;color:${c3};margin:16px 0 6px;letter-spacing:0.8px;text-transform:uppercase;">$1</h4>`)
+    .replace(/^### (.+)$/gm, `<h3 style="font-size:12px;font-weight:700;color:${c3};margin:20px 0 8px;letter-spacing:1.2px;text-transform:uppercase;">$1</h3>`)
     .replace(/^## (.+)$/gm, `<h2 style="font-size:16px;font-weight:700;color:${c1};margin:28px 0 10px;letter-spacing:-0.3px;border-bottom:1px solid ${c4};padding-bottom:8px;">$1</h2>`)
     .replace(/^# (.+)$/gm, `<h1 style="font-size:20px;font-weight:800;color:${c1};margin:0 0 20px;letter-spacing:-0.5px;">$1</h1>`)
     .replace(/\*\*(.+?)\*\*/g, `<strong style="color:${c1};font-weight:700;">$1</strong>`)
     .replace(/\*(.+?)\*/g, `<em style="color:${c2};">$1</em>`)
-    .replace(/^\| (.+) \|$/gm, (match: string) => {
-      const cells = match.split('|').filter((c: string) => c.trim())
-      return `<div style="display:flex;border-bottom:1px solid ${c4};padding:8px 0;">${cells.map((c: string) => `<div style="flex:1;font-size:13px;color:${c2};padding:0 8px;line-height:1.6;">${c.trim()}</div>`).join('')}</div>`
-    })
-    .replace(/^\|[-| ]+\|$/gm, '')
-    .replace(/^- (.+)$/gm, `<div style="display:flex;gap:10px;margin:6px 0;align-items:flex-start;"><span style="color:${bl};margin-top:4px;font-size:10px;">&#9658;</span><span style="font-size:14px;color:${c2};line-height:1.75;">$1</span></div>`)
+    .replace(/^- (.+)$/gm, `<div style="display:flex;gap:10px;margin:5px 0;align-items:flex-start;"><span style="color:${bl};margin-top:5px;font-size:9px;">&#9658;</span><span style="font-size:14px;color:${c2};line-height:1.75;">$1</span></div>`)
+    .replace(/^(\d+)\. (.+)$/gm, `<div style="display:flex;gap:10px;margin:5px 0;align-items:flex-start;"><span style="color:${c3};font-size:12px;min-width:18px;font-weight:600;">$1.</span><span style="font-size:14px;color:${c2};line-height:1.75;">$2</span></div>`)
     .replace(/\n\n/g, `<div style="height:10px"></div>`)
 }
 
@@ -222,17 +238,8 @@ export default function Research() {
         ::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:2px; }
       `}</style>
 
-      <nav style={{
-        borderBottom:`1px solid ${border}`, padding:'12px 32px',
-        display:'flex', alignItems:'center', justifyContent:'space-between',
-        position:'sticky', top:0, zIndex:10,
-        background:navBg, backdropFilter:'blur(12px)',
-        transition:'background 0.3s,border-color 0.3s',
-      }}>
-        <button
-          onClick={() => window.location.href = '/'}
-          style={{ display:'flex', alignItems:'center', gap:10, background:'none', border:'none', cursor:'pointer', flexShrink:0 }}
-        >
+      <nav style={{ borderBottom:`1px solid ${border}`, padding:'12px 32px', display:'flex', alignItems:'center', justifyContent:'space-between', position:'sticky', top:0, zIndex:10, background:navBg, backdropFilter:'blur(12px)', transition:'background 0.3s,border-color 0.3s' }}>
+        <button onClick={() => window.location.href = '/'} style={{ display:'flex', alignItems:'center', gap:10, background:'none', border:'none', cursor:'pointer', flexShrink:0 }}>
           <LogoMark size={28} color={logoColor}/>
           <div style={{ display:'flex', alignItems:'baseline', gap:4 }}>
             <span style={{ fontSize:14, fontWeight:800, color:tp, letterSpacing:3 }}>LEX</span>
@@ -243,12 +250,7 @@ export default function Research() {
           <span style={{ color:tp, fontWeight:600, cursor:'pointer' }} onClick={() => window.location.href='/research'}>Research</span>
           <span style={{ color:td, cursor:'pointer' }} onClick={() => window.location.href='/assistant'}>Assistant</span>
           <span style={{ color:td, cursor:'pointer' }} onClick={() => window.location.href='/drafts'}>Drafts</span>
-          <button onClick={() => setDark(d => !d)} style={{
-            background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
-            border:`1px solid ${border}`, borderRadius:20,
-            padding:'5px 12px', cursor:'pointer', fontSize:11,
-            color:td, fontFamily:'inherit', transition:'all 0.3s', letterSpacing:1,
-          }}>
+          <button onClick={() => setDark(d => !d)} style={{ background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)', border:`1px solid ${border}`, borderRadius:20, padding:'5px 12px', cursor:'pointer', fontSize:11, color:td, fontFamily:'inherit', transition:'all 0.3s', letterSpacing:1 }}>
             {dark ? '○ Light' : '● Dark'}
           </button>
         </div>
@@ -259,65 +261,26 @@ export default function Research() {
         {!results && !loading && (
           <div style={{ textAlign:'center', padding:'80px 0 48px' }}>
             <div style={{ fontSize:10, letterSpacing:3, color:td, marginBottom:12, textTransform:'uppercase' }}>LexSearch</div>
-            <h1 style={{ fontSize:40, fontWeight:800, color:tp, letterSpacing:-1.5, marginBottom:12 }}>
-              Search Indian Case Law
-            </h1>
+            <h1 style={{ fontSize:40, fontWeight:800, color:tp, letterSpacing:-1.5, marginBottom:12 }}>Search Indian Case Law</h1>
             <p style={{ fontSize:15, color:tm, lineHeight:1.7, marginBottom:48 }}>
-              27 crore judgments · Supreme Court · High Courts · District Courts
-              <br/>Instant AI legal analysis for practising advocates
+              27 crore judgments · Supreme Court · High Courts · District Courts<br/>Instant AI legal analysis for practising advocates
             </p>
-
             <div style={{ position:'relative', maxWidth:600, margin:'0 auto 32px' }}>
-              <input
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && search()}
-                placeholder={typed}
-                style={{
-                  width:'100%', background:inputBg,
-                  border:`1px solid ${border}`,
-                  borderRadius:12, padding:'16px 130px 16px 20px',
-                  fontSize:15, color:tp, fontFamily:'inherit', outline:'none',
-                  transition:'border-color 0.2s',
-                }}
-                onFocus={e => e.target.style.borderColor = borderHi}
-                onBlur={e => e.target.style.borderColor = border}
+              <input value={query} onChange={e => setQuery(e.target.value)} onKeyDown={e => e.key === 'Enter' && search()} placeholder={typed}
+                style={{ width:'100%', background:inputBg, border:`1px solid ${border}`, borderRadius:12, padding:'16px 130px 16px 20px', fontSize:15, color:tp, fontFamily:'inherit', outline:'none', transition:'border-color 0.2s' }}
+                onFocus={e => e.target.style.borderColor = borderHi} onBlur={e => e.target.style.borderColor = border}
               />
-              <button
-                onClick={() => search()}
-                disabled={loading}
-                style={{
-                  position:'absolute', right:6, top:'50%', transform:'translateY(-50%)',
-                  background:btnBg, color:btnTxt, border:'none',
-                  borderRadius:8, padding:'10px 24px',
-                  fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit',
-                }}
-              >
+              <button onClick={() => search()} disabled={loading} style={{ position:'absolute', right:6, top:'50%', transform:'translateY(-50%)', background:btnBg, color:btnTxt, border:'none', borderRadius:8, padding:'10px 24px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
                 Search
               </button>
             </div>
-
             <div style={{ display:'flex', gap:8, flexWrap:'wrap', justifyContent:'center' }}>
               {chips.map(q => (
-                <button key={q} onClick={() => search(q)} style={{
-                  background:abg, border:`1px solid ${border}`,
-                  borderRadius:20, padding:'6px 16px',
-                  fontSize:12, color:tm, cursor:'pointer',
-                  fontFamily:'inherit', transition:'all 0.15s',
-                }}
-                  onMouseEnter={e => {
-                    const b = e.currentTarget as HTMLButtonElement
-                    b.style.borderColor = borderHi
-                    b.style.color = tp
-                    b.style.background = abgH
-                  }}
-                  onMouseLeave={e => {
-                    const b = e.currentTarget as HTMLButtonElement
-                    b.style.borderColor = border
-                    b.style.color = tm
-                    b.style.background = abg
-                  }}
-                >{q}</button>
+                <button key={q} onClick={() => search(q)} style={{ background:abg, border:`1px solid ${border}`, borderRadius:20, padding:'6px 16px', fontSize:12, color:tm, cursor:'pointer', fontFamily:'inherit', transition:'all 0.15s' }}
+                  onMouseEnter={e => { const b=e.currentTarget as HTMLButtonElement; b.style.borderColor=borderHi; b.style.color=tp; b.style.background=abgH }}
+                  onMouseLeave={e => { const b=e.currentTarget as HTMLButtonElement; b.style.borderColor=border; b.style.color=tm; b.style.background=abg }}>
+                  {q}
+                </button>
               ))}
             </div>
           </div>
@@ -326,11 +289,7 @@ export default function Research() {
         {loading && <LoadingState />}
 
         {results?.error && (
-          <div style={{
-            background:'rgba(255,60,60,0.06)', border:'1px solid rgba(255,60,60,0.15)',
-            borderRadius:10, padding:'16px 20px',
-            color:'rgba(255,100,100,0.9)', fontSize:13, marginTop:40,
-          }}>
+          <div style={{ background:'rgba(255,60,60,0.06)', border:'1px solid rgba(255,60,60,0.15)', borderRadius:10, padding:'16px 20px', color:'rgba(255,100,100,0.9)', fontSize:13, marginTop:40 }}>
             {results.error}
           </div>
         )}
@@ -343,45 +302,31 @@ export default function Research() {
                 {results.cases?.length || 0} Cases · Indian Kanoon
               </div>
               {results.cases?.map((c: any, i: number) => (
-                <div
-                  key={i}
-                  className="case-item"
-                  onClick={() => setActiveCase(i)}
-                  style={{
-                    padding:'12px 14px', borderRadius:8, cursor:'pointer', marginBottom:4,
-                    background: activeCase === i ? (dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)') : 'transparent',
-                    borderLeft: `2px solid ${activeCase === i ? (dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)') : 'transparent'}`,
-                    transition:'all 0.15s',
-                    animationDelay:`${i * 0.05}s`,
-                  }}
+                <div key={i} className="case-item" onClick={() => setActiveCase(i)}
+                  style={{ padding:'12px 14px', borderRadius:8, cursor:'pointer', marginBottom:4, background: activeCase === i ? (dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)') : 'transparent', borderLeft: `2px solid ${activeCase === i ? (dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)') : 'transparent'}`, transition:'all 0.15s', animationDelay:`${i * 0.05}s` }}
                   onMouseEnter={e => { if (activeCase !== i) (e.currentTarget as HTMLDivElement).style.background = dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)' }}
-                  onMouseLeave={e => { if (activeCase !== i) (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
-                >
+                  onMouseLeave={e => { if (activeCase !== i) (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}>
                   <div style={{ fontSize:12, fontWeight:600, color: activeCase === i ? tp : tm, lineHeight:1.4, marginBottom:4 }}>
                     {c.title?.replace(/<[^>]*>/g, '').slice(0, 55)}{c.title?.length > 55 ? '...' : ''}
                   </div>
-                  <div style={{ fontSize:10, color:td }}>
-                    {c.docsource || 'Indian Kanoon'}{c.publishdate ? ' · ' + c.publishdate : ''}
-                  </div>
+                  <div style={{ fontSize:10, color:td }}>{c.docsource || 'Indian Kanoon'}{c.publishdate ? ' · ' + c.publishdate : ''}</div>
                 </div>
               ))}
               <button onClick={() => search(query + ' more judgments')} style={{ width:'100%', marginTop:8, background:'transparent', border:`1px solid ${border}`, borderRadius:8, padding:'8px', fontSize:11, color:td, cursor:'pointer', fontFamily:'inherit', transition:'all 0.15s' }}
-                onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.color=tp; b.style.borderColor=borderHi }}
-                onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.color=td; b.style.borderColor=border }}>
+                onMouseEnter={e => { const b=e.currentTarget as HTMLButtonElement; b.style.color=tp; b.style.borderColor=borderHi }}
+                onMouseLeave={e => { const b=e.currentTarget as HTMLButtonElement; b.style.color=td; b.style.borderColor=border }}>
                 + Load more cases
               </button>
               <button onClick={() => { setResults(null); setQuery('') }} style={{ width:'100%', marginTop:6, background:'transparent', border:`1px solid ${border}`, borderRadius:8, padding:'8px', fontSize:11, color:td, cursor:'pointer', fontFamily:'inherit', transition:'all 0.15s' }}
-                onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.color=tp; b.style.borderColor=borderHi }}
-                onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.color=td; b.style.borderColor=border }}>
+                onMouseEnter={e => { const b=e.currentTarget as HTMLButtonElement; b.style.color=tp; b.style.borderColor=borderHi }}
+                onMouseLeave={e => { const b=e.currentTarget as HTMLButtonElement; b.style.color=td; b.style.borderColor=border }}>
                 &#8592; New Search
               </button>
             </div>
 
             <div style={{ background:bgSurface, border:`1px solid ${border}`, borderRadius:12, padding:'32px', position:'sticky', top:72, maxHeight:'calc(100vh - 100px)', overflowY:'auto', transition:'background 0.3s,border-color 0.3s' }}>
-              <div style={{ fontSize:9, letterSpacing:2, color:td, marginBottom:20, textTransform:'uppercase' }}>
-                AI Legal Analysis · {query}
-              </div>
-              <div style={{ fontSize:14, color:tm, lineHeight:1.85 }} className={loading ? 'streaming-cursor' : ''} dangerouslySetInnerHTML={{ __html: renderMarkdown(results.ai_summary || '', dark) }} />
+              <div style={{ fontSize:9, letterSpacing:2, color:td, marginBottom:20, textTransform:'uppercase' }}>AI Legal Analysis · {query}</div>
+              <div style={{ fontSize:14, color:tm, lineHeight:1.85 }} dangerouslySetInnerHTML={{ __html: renderMarkdown(results.ai_summary || '', dark) }} />
               {results.cases?.[activeCase] && (
                 <div style={{ marginTop:32, paddingTop:24, borderTop:`1px solid ${border}` }}>
                   <div style={{ fontSize:9, letterSpacing:2, color:td, marginBottom:10, textTransform:'uppercase' }}>Case Detail</div>
@@ -407,8 +352,7 @@ export default function Research() {
                 if (!results?.ai_summary) return
                 try {
                   const res = await fetch('https://lexindia-backend-production.up.railway.app/api/vault/save', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ title: query, content: results.ai_summary, doc_type: 'LexSearch' })
                   })
                   if (res.ok) setSaved(true)
@@ -416,17 +360,17 @@ export default function Research() {
                 } catch { alert('Network error') }
               }} style={{ width:'100%', marginBottom:6, background: saved ? 'rgba(63,185,80,0.1)' : abg, border:`1px solid ${saved ? 'rgba(63,185,80,0.3)' : border}`, borderRadius:8, padding:'11px 14px', fontSize:12, color: saved ? '#3fb950' : tm, cursor:'pointer', fontFamily:'inherit', display:'flex', alignItems:'center', gap:9, transition:'all 0.2s', textAlign:'left' }}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                {saved ? '&#10003; Saved to Vault' : 'Save to Vault'}
+                {saved ? '✓ Saved to Vault' : 'Save to Vault'}
               </button>
               <button onClick={() => window.location.href = '/assistant'} style={{ width:'100%', marginBottom:6, background:abg, border:`1px solid ${border}`, borderRadius:8, padding:'11px 14px', fontSize:12, color:tm, cursor:'pointer', fontFamily:'inherit', display:'flex', alignItems:'center', gap:9, transition:'all 0.2s', textAlign:'left' }}
-                onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background=abgH; b.style.color=tp }}
-                onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background=abg; b.style.color=tm }}>
+                onMouseEnter={e => { const b=e.currentTarget as HTMLButtonElement; b.style.background=abgH; b.style.color=tp }}
+                onMouseLeave={e => { const b=e.currentTarget as HTMLButtonElement; b.style.background=abg; b.style.color=tm }}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
                 Ask LexChat
               </button>
               <button onClick={() => window.location.href = '/drafts'} style={{ width:'100%', marginBottom:24, background:abg, border:`1px solid ${border}`, borderRadius:8, padding:'11px 14px', fontSize:12, color:tm, cursor:'pointer', fontFamily:'inherit', display:'flex', alignItems:'center', gap:9, transition:'all 0.2s', textAlign:'left' }}
-                onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background=abgH; b.style.color=tp }}
-                onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background=abg; b.style.color=tm }}>
+                onMouseEnter={e => { const b=e.currentTarget as HTMLButtonElement; b.style.background=abgH; b.style.color=tp }}
+                onMouseLeave={e => { const b=e.currentTarget as HTMLButtonElement; b.style.background=abg; b.style.color=tm }}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                 Draft Document
               </button>
