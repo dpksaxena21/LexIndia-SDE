@@ -62,6 +62,7 @@ function renderMarkdown(text: string, dark: boolean) {
   const c4 = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'
   const bl = dark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)'
   return text
+    .replace(/^#### (.+)$/gm, `<h4 style="font-size:11px;font-weight:600;color:${c3};margin:12px 0 6px;letter-spacing:0.8px;text-transform:uppercase;">$1</h4>`)
     .replace(/^### (.+)$/gm, `<h3 style="font-size:11px;font-weight:700;color:${c3};margin:20px 0 8px;letter-spacing:1.5px;text-transform:uppercase;">$1</h3>`)
     .replace(/^## (.+)$/gm, `<h2 style="font-size:16px;font-weight:700;color:${c1};margin:28px 0 10px;letter-spacing:-0.3px;border-bottom:1px solid ${c4};padding-bottom:8px;">$1</h2>`)
     .replace(/^# (.+)$/gm, `<h1 style="font-size:20px;font-weight:800;color:${c1};margin:0 0 20px;letter-spacing:-0.5px;">$1</h1>`)
@@ -72,7 +73,7 @@ function renderMarkdown(text: string, dark: boolean) {
       return `<div style="display:flex;border-bottom:1px solid ${c4};padding:8px 0;">${cells.map((c: string) => `<div style="flex:1;font-size:13px;color:${c2};padding:0 8px;line-height:1.6;">${c.trim()}</div>`).join('')}</div>`
     })
     .replace(/^\|[-| ]+\|$/gm, '')
-    .replace(/^- (.+)$/gm, `<div style="display:flex;gap:10px;margin:6px 0;align-items:flex-start;"><span style="color:${bl};margin-top:4px;font-size:10px;">▸</span><span style="font-size:14px;color:${c2};line-height:1.75;">$1</span></div>`)
+    .replace(/^- (.+)$/gm, `<div style="display:flex;gap:10px;margin:6px 0;align-items:flex-start;"><span style="color:${bl};margin-top:4px;font-size:10px;">&#9658;</span><span style="font-size:14px;color:${c2};line-height:1.75;">$1</span></div>`)
     .replace(/\n\n/g, `<div style="height:10px"></div>`)
 }
 
@@ -221,7 +222,6 @@ export default function Research() {
         ::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:2px; }
       `}</style>
 
-      {/* NAVBAR */}
       <nav style={{
         borderBottom:`1px solid ${border}`, padding:'12px 32px',
         display:'flex', alignItems:'center', justifyContent:'space-between',
@@ -256,7 +256,6 @@ export default function Research() {
 
       <div style={{ maxWidth:1140, margin:'0 auto', padding:'0 24px' }}>
 
-        {/* HERO */}
         {!results && !loading && (
           <div style={{ textAlign:'center', padding:'80px 0 48px' }}>
             <div style={{ fontSize:10, letterSpacing:3, color:td, marginBottom:12, textTransform:'uppercase' }}>LexSearch</div>
@@ -324,10 +323,8 @@ export default function Research() {
           </div>
         )}
 
-        {/* Loading */}
         {loading && <LoadingState />}
 
-        {/* Error */}
         {results?.error && (
           <div style={{
             background:'rgba(255,60,60,0.06)', border:'1px solid rgba(255,60,60,0.15)',
@@ -338,11 +335,9 @@ export default function Research() {
           </div>
         )}
 
-        {/* RESULTS */}
         {results && !results.error && (
           <div style={{ display:'grid', gridTemplateColumns: winW < 768 ? '1fr' : '260px 1fr 220px', gap:16, paddingTop:24, paddingBottom:40 }}>
 
-            {/* LEFT — Cases */}
             <div>
               <div style={{ fontSize:9, letterSpacing:2, color:td, marginBottom:12, textTransform:'uppercase' }}>
                 {results.cases?.length || 0} Cases · Indian Kanoon
@@ -359,14 +354,8 @@ export default function Research() {
                     transition:'all 0.15s',
                     animationDelay:`${i * 0.05}s`,
                   }}
-                  onMouseEnter={e => {
-                    if (activeCase !== i)
-                      (e.currentTarget as HTMLDivElement).style.background = dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'
-                  }}
-                  onMouseLeave={e => {
-                    if (activeCase !== i)
-                      (e.currentTarget as HTMLDivElement).style.background = 'transparent'
-                  }}
+                  onMouseEnter={e => { if (activeCase !== i) (e.currentTarget as HTMLDivElement).style.background = dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)' }}
+                  onMouseLeave={e => { if (activeCase !== i) (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
                 >
                   <div style={{ fontSize:12, fontWeight:600, color: activeCase === i ? tp : tm, lineHeight:1.4, marginBottom:4 }}>
                     {c.title?.replace(/<[^>]*>/g, '').slice(0, 55)}{c.title?.length > 55 ? '...' : ''}
@@ -376,181 +365,77 @@ export default function Research() {
                   </div>
                 </div>
               ))}
-
-              <button
-                onClick={() => search(query + ' more judgments')}
-                style={{
-                  width:'100%', marginTop:8, background:'transparent',
-                  border:`1px solid ${border}`, borderRadius:8, padding:'8px',
-                  fontSize:11, color:td, cursor:'pointer', fontFamily:'inherit', transition:'all 0.15s',
-                }}
+              <button onClick={() => search(query + ' more judgments')} style={{ width:'100%', marginTop:8, background:'transparent', border:`1px solid ${border}`, borderRadius:8, padding:'8px', fontSize:11, color:td, cursor:'pointer', fontFamily:'inherit', transition:'all 0.15s' }}
                 onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.color=tp; b.style.borderColor=borderHi }}
-                onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.color=td; b.style.borderColor=border }}
-              >
+                onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.color=td; b.style.borderColor=border }}>
                 + Load more cases
               </button>
-
-              <button
-                onClick={() => { setResults(null); setQuery('') }}
-                style={{
-                  width:'100%', marginTop:6, background:'transparent',
-                  border:`1px solid ${border}`, borderRadius:8, padding:'8px',
-                  fontSize:11, color:td, cursor:'pointer', fontFamily:'inherit', transition:'all 0.15s',
-                }}
+              <button onClick={() => { setResults(null); setQuery('') }} style={{ width:'100%', marginTop:6, background:'transparent', border:`1px solid ${border}`, borderRadius:8, padding:'8px', fontSize:11, color:td, cursor:'pointer', fontFamily:'inherit', transition:'all 0.15s' }}
                 onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.color=tp; b.style.borderColor=borderHi }}
-                onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.color=td; b.style.borderColor=border }}
-              >
-                ← New Search
+                onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.color=td; b.style.borderColor=border }}>
+                &#8592; New Search
               </button>
             </div>
 
-            {/* CENTER — AI Analysis */}
-            <div style={{
-              background:bgSurface, border:`1px solid ${border}`,
-              borderRadius:12, padding:'32px',
-              position:'sticky', top:72,
-              maxHeight:'calc(100vh - 100px)', overflowY:'auto',
-              transition:'background 0.3s,border-color 0.3s',
-            }}>
+            <div style={{ background:bgSurface, border:`1px solid ${border}`, borderRadius:12, padding:'32px', position:'sticky', top:72, maxHeight:'calc(100vh - 100px)', overflowY:'auto', transition:'background 0.3s,border-color 0.3s' }}>
               <div style={{ fontSize:9, letterSpacing:2, color:td, marginBottom:20, textTransform:'uppercase' }}>
                 AI Legal Analysis · {query}
               </div>
-              <div
-                style={{ fontSize:14, color:tm, lineHeight:1.85 }}
-                className={loading ? 'streaming-cursor' : ''} dangerouslySetInnerHTML={{ __html: renderMarkdown(results.ai_summary || '', dark) }}
-              />
-
+              <div style={{ fontSize:14, color:tm, lineHeight:1.85 }} className={loading ? 'streaming-cursor' : ''} dangerouslySetInnerHTML={{ __html: renderMarkdown(results.ai_summary || '', dark) }} />
               {results.cases?.[activeCase] && (
                 <div style={{ marginTop:32, paddingTop:24, borderTop:`1px solid ${border}` }}>
-                  <div style={{ fontSize:9, letterSpacing:2, color:td, marginBottom:10, textTransform:'uppercase' }}>
-                    Case Detail
-                  </div>
+                  <div style={{ fontSize:9, letterSpacing:2, color:td, marginBottom:10, textTransform:'uppercase' }}>Case Detail</div>
                   <div style={{ fontSize:13, fontWeight:600, color:tp, marginBottom:8, lineHeight:1.4 }}>
                     {results.cases[activeCase].title?.replace(/<[^>]*>/g, '')}
                   </div>
-                  <div
-                    style={{ fontSize:12, color:tm, lineHeight:1.7 }}
-                    dangerouslySetInnerHTML={{
-                      __html: (results.cases[activeCase].headline || results.cases[activeCase].doc || '').slice(0, 400) + '...'
-                    }}
-                  />
+                  <div style={{ fontSize:12, color:tm, lineHeight:1.7 }} dangerouslySetInnerHTML={{ __html: (results.cases[activeCase].headline || results.cases[activeCase].doc || '').slice(0, 400) + '...' }} />
                   {results.cases[activeCase].tid && (
-                    <button
-                      onClick={() => openCase(results.cases[activeCase].tid)}
-                      style={{
-                        display:'inline-block', marginTop:12, fontSize:11,
-                        color: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
-                        background:'none', border:'none',
-                        borderBottom:`1px solid ${border}`,
-                        cursor:'pointer', fontFamily:'inherit', padding:0,
-                        transition:'color 0.15s',
-                      }}
+                    <button onClick={() => openCase(results.cases[activeCase].tid)} style={{ display:'inline-block', marginTop:12, fontSize:11, color: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)', background:'none', border:'none', borderBottom:`1px solid ${border}`, cursor:'pointer', fontFamily:'inherit', padding:0, transition:'color 0.15s' }}
                       onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.color = tp}
-                      onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.color = dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'}
-                    >
-                      Read full judgment on Indian Kanoon →
+                      onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.color = dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'}>
+                      Read full judgment on Indian Kanoon &#8594;
                     </button>
                   )}
                 </div>
               )}
             </div>
 
-            {/* RIGHT — Actions */}
             <div style={{ position: winW < 768 ? 'relative' : 'sticky', top: winW < 768 ? 0 : 72 }}>
-              <div style={{ fontSize:9, letterSpacing:2, color:td, marginBottom:10, textTransform:'uppercase' }}>
-                Actions
-              </div>
-
-              <button
-                onClick={async () => {
-                  if (!token) { alert('Please sign in to save to vault'); return }
-                  if (!results?.ai_summary) return
-                  try {
-                    const res = await fetch('https://lexindia-backend-production.up.railway.app/api/vault/save', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                      body: JSON.stringify({ title: query, content: results.ai_summary, doc_type: 'LexSearch' })
-                    })
-                    if (res.ok) setSaved(true)
-                    else alert('Failed to save')
-                  } catch { alert('Network error') }
-                }}
-                style={{
-                  width:'100%', marginBottom:6,
-                  background: saved ? 'rgba(63,185,80,0.1)' : abg,
-                  border:`1px solid ${saved ? 'rgba(63,185,80,0.3)' : border}`,
-                  borderRadius:8, padding:'11px 14px', fontSize:12,
-                  color: saved ? '#3fb950' : tm,
-                  cursor:'pointer', fontFamily:'inherit',
-                  display:'flex', alignItems:'center', gap:9,
-                  transition:'all 0.2s', textAlign:'left',
-                }}
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                  <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
-                  <polyline points="17 21 17 13 7 13 7 21"/>
-                  <polyline points="7 3 7 8 15 8"/>
-                </svg>
-                {saved ? '✓ Saved to Vault' : 'Save to Vault'}
+              <div style={{ fontSize:9, letterSpacing:2, color:td, marginBottom:10, textTransform:'uppercase' }}>Actions</div>
+              <button onClick={async () => {
+                if (!token) { alert('Please sign in to save to vault'); return }
+                if (!results?.ai_summary) return
+                try {
+                  const res = await fetch('https://lexindia-backend-production.up.railway.app/api/vault/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ title: query, content: results.ai_summary, doc_type: 'LexSearch' })
+                  })
+                  if (res.ok) setSaved(true)
+                  else alert('Failed to save')
+                } catch { alert('Network error') }
+              }} style={{ width:'100%', marginBottom:6, background: saved ? 'rgba(63,185,80,0.1)' : abg, border:`1px solid ${saved ? 'rgba(63,185,80,0.3)' : border}`, borderRadius:8, padding:'11px 14px', fontSize:12, color: saved ? '#3fb950' : tm, cursor:'pointer', fontFamily:'inherit', display:'flex', alignItems:'center', gap:9, transition:'all 0.2s', textAlign:'left' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                {saved ? '&#10003; Saved to Vault' : 'Save to Vault'}
               </button>
-
-              <button
-                onClick={() => window.location.href = '/assistant'}
-                style={{
-                  width:'100%', marginBottom:6, background:abg,
-                  border:`1px solid ${border}`, borderRadius:8, padding:'11px 14px',
-                  fontSize:12, color:tm, cursor:'pointer', fontFamily:'inherit',
-                  display:'flex', alignItems:'center', gap:9,
-                  transition:'all 0.2s', textAlign:'left',
-                }}
+              <button onClick={() => window.location.href = '/assistant'} style={{ width:'100%', marginBottom:6, background:abg, border:`1px solid ${border}`, borderRadius:8, padding:'11px 14px', fontSize:12, color:tm, cursor:'pointer', fontFamily:'inherit', display:'flex', alignItems:'center', gap:9, transition:'all 0.2s', textAlign:'left' }}
                 onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background=abgH; b.style.color=tp }}
-                onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background=abg; b.style.color=tm }}
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                  <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-                </svg>
+                onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background=abg; b.style.color=tm }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
                 Ask LexChat
               </button>
-
-              <button
-                onClick={() => window.location.href = '/drafts'}
-                style={{
-                  width:'100%', marginBottom:24, background:abg,
-                  border:`1px solid ${border}`, borderRadius:8, padding:'11px 14px',
-                  fontSize:12, color:tm, cursor:'pointer', fontFamily:'inherit',
-                  display:'flex', alignItems:'center', gap:9,
-                  transition:'all 0.2s', textAlign:'left',
-                }}
+              <button onClick={() => window.location.href = '/drafts'} style={{ width:'100%', marginBottom:24, background:abg, border:`1px solid ${border}`, borderRadius:8, padding:'11px 14px', fontSize:12, color:tm, cursor:'pointer', fontFamily:'inherit', display:'flex', alignItems:'center', gap:9, transition:'all 0.2s', textAlign:'left' }}
                 onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background=abgH; b.style.color=tp }}
-                onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background=abg; b.style.color=tm }}
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                  <polyline points="14 2 14 8 20 8"/>
-                  <line x1="16" y1="13" x2="8" y2="13"/>
-                  <line x1="16" y1="17" x2="8" y2="17"/>
-                </svg>
+                onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background=abg; b.style.color=tm }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                 Draft Document
               </button>
-
-              <div style={{ fontSize:9, letterSpacing:2, color:td, marginBottom:10, textTransform:'uppercase' }}>
-                Related
-              </div>
+              <div style={{ fontSize:9, letterSpacing:2, color:td, marginBottom:10, textTransform:'uppercase' }}>Related</div>
               {related.map(q => (
-                <button
-                  key={q}
-                  onClick={() => search(q)}
-                  style={{
-                    display:'block', width:'100%', textAlign:'left',
-                    background:'transparent', border:'none',
-                    borderBottom:`1px solid ${border}`,
-                    padding:'8px 0', fontSize:11, color:td,
-                    cursor:'pointer', fontFamily:'inherit', transition:'color 0.15s',
-                  }}
+                <button key={q} onClick={() => search(q)} style={{ display:'block', width:'100%', textAlign:'left', background:'transparent', border:'none', borderBottom:`1px solid ${border}`, padding:'8px 0', fontSize:11, color:td, cursor:'pointer', fontFamily:'inherit', transition:'color 0.15s' }}
                   onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.color = tp}
-                  onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.color = td}
-                >
-                  {String.fromCharCode(8594)} {q}
+                  onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.color = td}>
+                  &#8594; {q}
                 </button>
               ))}
             </div>
