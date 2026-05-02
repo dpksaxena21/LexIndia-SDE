@@ -324,7 +324,7 @@ export default function Home() {
             `}</style>
             <div style={{ display:'inline-flex', alignItems:'center', gap:8, border:`1px solid ${pillBorder}`, borderRadius:20, padding:'5px 16px', fontSize:12, color:textMuted, marginBottom:40, letterSpacing:1, animation:'floatPill 3s ease-in-out infinite' }}>
               <span style={{ width:6, height:6, borderRadius:'50%', background:'#3fb950', display:'inline-block', boxShadow:'0 0 6px #3fb950' }}/>
-              6 modules live — lexsindia.com
+              10 modules live — lexsindia.com
             </div>
             <h1 style={{ fontSize:'clamp(36px, 6vw, 68px)', fontWeight:800, lineHeight:1.08, letterSpacing:-2, marginBottom:24, backgroundImage:heroGradient, WebkitBackgroundClip:'text' as const, WebkitTextFillColor:'transparent', backgroundClip:'text' as const, display:'block' }}>
               AI Legal Research<br/>for Indian<br/>Advocates.
@@ -333,10 +333,10 @@ export default function Home() {
               Research. Drafting. Case tracking. File storage.<br/>AI assistance. All in one workspace.
             </p>
             <div style={{ display:'flex', gap:12, justifyContent:'center', flexWrap:'wrap' }}>
-              <button onClick={() => window.location.href = user ? '/dashboard' : '/register'} style={{ background:btnBg, color:btnText, border:'none', padding:'13px 28px', borderRadius:24, fontSize:14, fontWeight:700, cursor:'pointer', transition:'transform 0.15s ease,box-shadow 0.15s ease,background 0.3s,color 0.3s' }}
+              <button onClick={() => window.location.href = '/research'} style={{ background:btnBg, color:btnText, border:'none', padding:'13px 28px', borderRadius:24, fontSize:14, fontWeight:700, cursor:'pointer', transition:'transform 0.15s ease,box-shadow 0.15s ease,background 0.3s,color 0.3s' }}
                 onMouseEnter={e => { const b=e.currentTarget as HTMLButtonElement; b.style.transform='scale(1.05)'; b.style.boxShadow=dark?'0 8px 24px rgba(255,255,255,0.15)':'0 8px 24px rgba(0,0,0,0.15)' }}
                 onMouseLeave={e => { const b=e.currentTarget as HTMLButtonElement; b.style.transform='scale(1)'; b.style.boxShadow='none' }}>
-                {user ? 'Go to Dashboard' : 'Try LexIndia Free'}
+                Start Researching Free
               </button>
               <button onClick={() => window.open('https://github.com/dpksaxena21/LexIndia-SDE', '_blank')} style={{ background:'transparent', color:textMuted, border:`1px solid ${pillBorder}`, padding:'13px 28px', borderRadius:24, fontSize:14, cursor:'pointer', transition:'all 0.2s' }}
                 onMouseEnter={e => { const b=e.currentTarget as HTMLButtonElement; b.style.borderColor=borderHover; b.style.color=textPrimary }}
@@ -353,7 +353,7 @@ export default function Home() {
             <div style={{ display:'grid', gridTemplateColumns: isMobile ? 'repeat(2,1fr)' : 'repeat(4,1fr)', border:`1px solid ${border}`, borderRadius:16, background:bgSurface, backdropFilter:'blur(8px)', transition:'background 0.3s,border-color 0.3s' }}>
               {[
                 { target:27, suffix:'Cr+', l:'Judgments' },
-                { target:6,  suffix:'',    l:'Live Modules' },
+                { target:10, suffix:'', l:'Live Modules' },
                 { target:4,  suffix:'',    l:'APIs' },
                 { target:56, suffix:'',    l:'Doc Types' },
               ].map((s, i) => <StatCard key={i} index={i} target={s.target} suffix={s.suffix} label={s.l} textPrimary={textPrimary} textDim={textDim} border={border}/>)}
@@ -364,7 +364,7 @@ export default function Home() {
 
           {/* MODULE GROUPS */}
           <section style={{ maxWidth:960, margin:'64px auto', padding:'0 24px' }}>
-            <p style={{ textAlign:'center', fontSize:10, letterSpacing:4, color:textDim, textTransform:'uppercase', marginBottom:48, transition:'color 0.3s' }}>16 Modules · 6 Live</p>
+            <p style={{ textAlign:'center', fontSize:10, letterSpacing:4, color:textDim, textTransform:'uppercase', marginBottom:48, transition:'color 0.3s' }}>16 Modules · 10 Live</p>
 
             {MODULE_GROUPS.map((group, gi) => (
               <div key={group.label} style={{ marginBottom:48 }}>
