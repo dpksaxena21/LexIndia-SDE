@@ -94,6 +94,11 @@ export default function LexVault() {
   const [dragging, setDragging] = useState(false)
   const [width, setWidth] = useState(1200)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+  if (!token && !loading) {
+    window.location.href = '/login'
+  }
+}, [token, loading])
 
   useEffect(() => {
     setWidth(window.innerWidth)
@@ -211,7 +216,10 @@ export default function LexVault() {
         body: formData,
       })
       if (res.ok) await fetchData()
-    } catch {}
+    } catch (e) {
+      console.error('Upload error:', e)
+      alert('Upload failed. Please try again.')
+    }
     setUploading(false)
   }
 
