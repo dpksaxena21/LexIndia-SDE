@@ -170,7 +170,7 @@ const MODULE_PATHS: Record<string, string> = {
   LexChat: '/assistant',
   LexDraft: '/drafts',
   LexScan: '/scan',
-  LexVault: '/dashboard',
+  LexVault: '/vault',
   LexPlain: '/plain',
 }
 
