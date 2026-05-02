@@ -68,6 +68,7 @@ export default function BottomNav() {
     <>
       <style>{`
         .bottom-nav-btn { transition: color 0.15s, transform 0.15s; }
+  @media(min-width: 768px) { nav { display: none; } }
         .bottom-nav-btn:active { transform: scale(0.9); }
       `}</style>
       <nav style={{
