@@ -34,7 +34,7 @@ type Mode = {
 
 const MODES: Mode[] = [
   {
-    id: 'lexchat', name: 'LexChat', tagline: 'Senior Advocate AI', color: '#C7A56A',
+    id: 'lexchat', name: 'LexChat', tagline: '', color: '#C7A56A',
     icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>,
     system: `You are LexChat, a senior Indian advocate with 50 years of experience. Deep expertise in BNS, BNSS, IPC, CrPC, Indian Evidence Act, Constitution of India. Cite relevant sections and landmark cases. Give practical actionable advice an advocate can use in court.`,
     suggestions: [
@@ -395,7 +395,7 @@ export default function Home() {
                   {mode.id === 'lexchat' ? 'LexIndia AI' : mode.name}
                 </h1>
                 <p style={{ fontSize: 14, color: tm, marginBottom: 8, textAlign: 'center', animation: 'fadeUp 0.5s ease 0.1s both' }}>{mode.tagline}</p>
-                <p style={{ fontSize: 12, color: td, marginBottom: 36, textAlign: 'center', animation: 'fadeUp 0.5s ease 0.15s both' }}>Powered by Claude AI · Indian Law Specialist</p>
+                <p style={{ fontSize: 12, color: td, marginBottom: 36, textAlign: 'center', animation: 'fadeUp 0.5s ease 0.15s both' }}></p>
                 <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(2,1fr)', gap: 8, width: '100%', maxWidth: 540 }}>
                   {mode.suggestions.map((s, i) => (
                     <button key={i} className="suggestion-btn" onClick={() => send(s.text)}
@@ -477,7 +477,7 @@ export default function Home() {
               </button>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
-              <span style={{ fontSize: 11, color: td }}>LexIndia AI · Indian Law · Powered by Claude</span>
+              <span style={{ fontSize: 11, color: td }}></span>
               {messages.length > 0 && (
                 <button onClick={newChat} style={{ background: 'transparent', border: 'none', fontSize: 11, color: td, cursor: 'pointer', fontFamily: 'inherit' }}
                   onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.color = tp}
