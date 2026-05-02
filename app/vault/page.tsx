@@ -141,6 +141,8 @@ export default function LexVault() {
   const [preview, setPreview] = useState<{ item: VaultItem; url?: string } | null>(null)
   const [analysis, setAnalysis] = useState<{ text: string; loading: boolean } | null>(null)
   const [scanning, setScanning] = useState(false)
+  const [draggedItem, setDraggedItem] = useState(null)
+  const [dragOverFolder, setDragOverFolder] = useState(null)
   const [fullscreen, setFullscreen] = useState(false)
   const [dragging, setDragging] = useState(false)
   const [width, setWidth] = useState(1200)
@@ -281,6 +283,17 @@ export default function LexVault() {
     setScanning(false)
   }
 
+  const moveItemToFolder = async (itemId, folderId) => {
+    if (!token) return
+    await fetch(`${API}/api/vault/${itemId}/move`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ folder_id: folderId }),
+    })
+    setItems(prev => prev.map(i => i.id === itemId ? { ...i, folder_id: folderId } : i))
+    setDraggedItem(null); setDragOverFolder(null)
+  }
+
   const bg = '#080809'; const sidebarBg = '#060608'
   const surface = 'rgba(255,255,255,0.03)'; const border = 'rgba(255,255,255,0.08)'
   const borderHi = 'rgba(255,255,255,0.18)'; const tp = '#ffffff'
@@ -350,6 +363,7 @@ export default function LexVault() {
         .vault-item:hover .three-dots-btn{opacity:1!important}
         .three-dots-btn{opacity:0;transition:opacity 0.15s}
         .folder-item:hover{background:rgba(255,255,255,0.06)!important}
+        .folder-drop{background:rgba(199,165,106,0.15)!important;border-color:rgba(199,165,106,0.5)!important}
         .sidebar-item:hover{background:rgba(255,255,255,0.06)!important}
         .ctx-item:hover{background:rgba(255,255,255,0.08)!important}
         input::placeholder{color:rgba(255,255,255,0.25)}
@@ -622,7 +636,7 @@ export default function LexVault() {
 
               {/* AI Panel */}
               {analysis && (
-                <div style={{ width: fullscreen ? 360 : 320, flexShrink:0, borderLeft:`1px solid ${border}`, display:'flex', flexDirection:'column' }}>
+                <div style={{ width: fullscreen ? '40%' : 320, minWidth:260, flexShrink:0, borderLeft:`1px solid ${border}`, display:'flex', flexDirection:'column', resize:'horizontal', overflow:'auto' }}>
                   <div style={{ padding:'12px 16px', borderBottom:`1px solid ${border}`, display:'flex', alignItems:'center', gap:8 }}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={gold} strokeWidth="1.5" strokeLinecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                     <span style={{ fontSize:11, color:gold, letterSpacing:'1px', textTransform:'uppercase', fontWeight:600 }}>AI Analysis</span>
