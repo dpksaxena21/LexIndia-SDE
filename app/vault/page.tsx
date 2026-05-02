@@ -261,23 +261,20 @@ export default function LexVault() {
   }
 
   const scanItem = async (item: VaultItem) => {
-    if (!token || !preview?.url) return
+    if (!token) return
     setScanning(true)
     setAnalysis({ text: '', loading: true })
     try {
-      const fileRes = await fetch(preview.url)
-      const blob = await fileRes.blob()
-      const file = new File([blob], item.title, { type: blob.type })
-      const fd = new FormData()
-      fd.append('file', file)
-      fd.append('question', '')
-      const res = await fetch(`${API}/api/scan`, {
+      const res = await fetch(`${API}/api/vault/scan/${item.id}`, {
         method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        body: fd,
+        headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
-      setAnalysis({ text: data.analysis, loading: false })
+      if (data.detail) {
+        setAnalysis({ text: `Error: ${data.detail}`, loading: false })
+      } else {
+        setAnalysis({ text: data.analysis, loading: false })
+      }
     } catch {
       setAnalysis({ text: 'Scan failed. Please try again.', loading: false })
     }
