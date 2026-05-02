@@ -61,6 +61,24 @@ function renderMarkdown(text: string) {
   const c3 = 'rgba(255,255,255,0.08)'
   const c4 = 'rgba(255,255,255,0.5)'
   const bl = 'rgba(255,255,255,0.3)'
+  // Tables
+  text = text.replace(/((?:^\|.+\|\n?)+)/gm, (block) => {
+    const rows = block.trim().split('\n').filter(r => r.trim())
+    let html = `<div style="overflow-x:auto;margin:12px 0;"><table style="width:100%;border-collapse:collapse;font-size:12px;">`
+    let isFirst = true
+    for (const row of rows) {
+      if (/^\|[-| :]+\|$/.test(row.trim())) continue
+      const cells = row.split('|').filter(c => c.trim())
+      if (isFirst) {
+        html += `<thead><tr>${cells.map(c => `<th style="padding:7px 10px;text-align:left;border-bottom:2px solid rgba(255,255,255,0.15);color:#fff;font-weight:600;font-size:11px;background:rgba(255,255,255,0.05);">${c.trim()}</th>`).join('')}</tr></thead><tbody>`
+        isFirst = false
+      } else {
+        html += `<tr>${cells.map((c,i) => `<td style="padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.06);color:${c2};line-height:1.5;vertical-align:top;">${c.trim()}</td>`).join('')}</tr>`
+      }
+    }
+    html += `</tbody></table></div>`
+    return html
+  })
   return text
     .replace(/^#### (.+)$/gm, `<h4 style="font-size:11px;font-weight:600;color:${c4};margin:12px 0 5px;letter-spacing:0.8px;text-transform:uppercase;">$1</h4>`)
     .replace(/^### (.+)$/gm, `<h3 style="font-size:12px;font-weight:700;color:${c4};margin:16px 0 7px;letter-spacing:0.5px;text-transform:uppercase;">$1</h3>`)
@@ -642,7 +660,7 @@ export default function LexVault() {
 
               {/* AI Panel */}
               {analysis && (
-                <div style={{ width: fullscreen ? '40%' : 320, minWidth:260, flexShrink:0, borderLeft:`1px solid ${border}`, display:'flex', flexDirection:'column', resize:'horizontal', overflow:'auto' }}>
+                <div style={{ width: fullscreen ? '40%' : 320, minWidth:240, maxWidth:'65%', flexShrink:0, borderLeft:`1px solid ${border}`, display:'flex', flexDirection:'column', overflow:'hidden', position:'relative' }}>
                   <div style={{ padding:'12px 16px', borderBottom:`1px solid ${border}`, display:'flex', alignItems:'center', gap:8 }}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={gold} strokeWidth="1.5" strokeLinecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                     <span style={{ fontSize:11, color:gold, letterSpacing:'1px', textTransform:'uppercase', fontWeight:600 }}>AI Analysis</span>
