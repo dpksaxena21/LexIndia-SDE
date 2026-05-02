@@ -203,6 +203,7 @@ export default function Assistant() {
   const [sessions, setSessions] = useState<Session[]>([])
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sessionLoading, setSessionLoading] = useState(false)
   const [width, setWidth] = useState(1200)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -223,7 +224,6 @@ export default function Assistant() {
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages, loading])
 
-  // Load sessions
   useEffect(() => {
     if (!token) return
     fetch(`${API}/api/chat/sessions`, { headers: { Authorization: `Bearer ${token}` } })
@@ -236,19 +236,18 @@ export default function Assistant() {
     if (!token) return
     setCurrentSessionId(sessionId)
     if (isMobile) setSidebarOpen(false)
-    // We don't have a get-session endpoint, so just set the session ID
-    // Messages will load on next send
     setMessages([])
-    // Fetch session messages via a dummy call to get history
+    setSessionLoading(true)
     try {
-      const res = await fetch(`${API}/api/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ message: '__load__', session_id: sessionId, history: [] }),
+      const res = await fetch(`${API}/api/chat/sessions/${sessionId}`, {
+        headers: { Authorization: `Bearer ${token}` }
       })
-      // We can't easily get old messages without a dedicated endpoint
-      // For now just start fresh in the session
+      const data = await res.json()
+      if (data.messages && Array.isArray(data.messages)) {
+        setMessages(data.messages.map((m: any) => ({ role: m.role, content: m.content })))
+      }
     } catch {}
+    setSessionLoading(false)
   }
 
   const deleteSession = async (sessionId: string, e: React.MouseEvent) => {
@@ -256,10 +255,7 @@ export default function Assistant() {
     if (!token) return
     await fetch(`${API}/api/chat/sessions/${sessionId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
     setSessions(prev => prev.filter(s => s.id !== sessionId))
-    if (currentSessionId === sessionId) {
-      setCurrentSessionId(null)
-      setMessages([])
-    }
+    if (currentSessionId === sessionId) { setCurrentSessionId(null); setMessages([]) }
   }
 
   const newChat = () => {
@@ -289,7 +285,6 @@ export default function Assistant() {
       const data = await res.json()
       if (data.session_id && data.session_id !== currentSessionId) {
         setCurrentSessionId(data.session_id)
-        // Add new session to sidebar
         const newSession: Session = { id: data.session_id, title: msg.slice(0, 50), updated_at: new Date().toISOString() }
         setSessions(prev => [newSession, ...prev.filter(s => s.id !== data.session_id)])
       }
@@ -354,7 +349,6 @@ export default function Assistant() {
       {/* SIDEBAR */}
       {sidebarOpen && (
         <div style={{ width: isMobile ? '100%' : 260, flexShrink:0, background:sidebarBg, borderRight:`1px solid ${border}`, display:'flex', flexDirection:'column', position: isMobile ? 'fixed' : 'relative', inset: isMobile ? 0 : 'auto', zIndex: isMobile ? 50 : 1 }}>
-          {/* Sidebar header */}
           <div style={{ padding:'16px 12px 12px', borderBottom:`1px solid ${border}` }}>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
               <button onClick={() => window.location.href='/'} style={{ display:'flex', alignItems:'center', gap:8, background:'none', border:'none', cursor:'pointer', padding:0 }}>
@@ -373,7 +367,6 @@ export default function Assistant() {
             </button>
           </div>
 
-          {/* Sessions list */}
           <div style={{ flex:1, overflowY:'auto', padding:'8px 6px' }}>
             {!token ? (
               <div style={{ padding:'20px 12px', textAlign:'center' }}>
@@ -388,13 +381,15 @@ export default function Assistant() {
               <>
                 <div style={{ fontSize:10, color:td, letterSpacing:'1px', textTransform:'uppercase', padding:'4px 8px 8px', fontWeight:600 }}>Recent</div>
                 {sessions.map(s => (
-                  <div key={s.id} className="session-item" onClick={() => loadSession(s.id)} style={{ padding:'8px 10px', borderRadius:8, cursor:'pointer', marginBottom:2, background: currentSessionId === s.id ? 'rgba(255,255,255,0.08)' : 'transparent', border: `1px solid ${currentSessionId === s.id ? border : 'transparent'}`, display:'flex', alignItems:'center', gap:8, transition:'all 0.1s', position:'relative' }}>
+                  <div key={s.id} className="session-item" onClick={() => loadSession(s.id)}
+                    style={{ padding:'8px 10px', borderRadius:8, cursor:'pointer', marginBottom:2, background: currentSessionId === s.id ? 'rgba(255,255,255,0.08)' : 'transparent', border: `1px solid ${currentSessionId === s.id ? border : 'transparent'}`, display:'flex', alignItems:'center', gap:8, transition:'all 0.1s', position:'relative' }}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={td} strokeWidth="1.5" strokeLinecap="round" style={{ flexShrink:0 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{ fontSize:12, color: currentSessionId === s.id ? tp : tm, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', fontWeight: currentSessionId === s.id ? 500 : 400 }}>{s.title}</div>
                       <div style={{ fontSize:10, color:td, marginTop:2 }}>{formatTime(s.updated_at)}</div>
                     </div>
-                    <button className="del-btn" onClick={(e) => deleteSession(s.id, e)} style={{ opacity:0, background:'transparent', border:'none', color:td, cursor:'pointer', padding:2, borderRadius:4, flexShrink:0, transition:'opacity 0.15s' }}
+                    <button className="del-btn" onClick={(e) => deleteSession(s.id, e)}
+                      style={{ opacity:0, background:'transparent', border:'none', color:td, cursor:'pointer', padding:2, borderRadius:4, flexShrink:0, transition:'opacity 0.15s' }}
                       onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.color='#ef4444'}
                       onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.color=td}>
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14a2,2,0,0,1-2,2H8a2,2,0,0,1-2-2L5,6"/></svg>
@@ -405,7 +400,6 @@ export default function Assistant() {
             )}
           </div>
 
-          {/* Sidebar footer */}
           {token && (
             <div style={{ padding:'12px', borderTop:`1px solid ${border}` }}>
               <button onClick={() => window.location.href='/dashboard'} style={{ width:'100%', padding:'8px 12px', background:'transparent', border:`1px solid ${border}`, borderRadius:8, color:td, fontSize:12, cursor:'pointer', fontFamily:'inherit', display:'flex', alignItems:'center', gap:8 }}
@@ -422,7 +416,6 @@ export default function Assistant() {
       {/* MAIN AREA */}
       <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden', minWidth:0 }}>
 
-        {/* NAVBAR */}
         <nav style={{ borderBottom:`1px solid ${border}`, padding:'10px 20px', display:'flex', alignItems:'center', justifyContent:'space-between', background:'rgba(8,8,9,0.92)', backdropFilter:'blur(12px)', flexShrink:0 }}>
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
             {!sidebarOpen && (
@@ -443,11 +436,17 @@ export default function Assistant() {
           </div>
         </nav>
 
-        {/* CHAT AREA */}
         <div style={{ flex:1, overflowY:'auto', padding:'0 24px' }}>
           <div style={{ maxWidth:720, margin:'0 auto', paddingBottom:20 }}>
 
-            {messages.length === 0 && (
+            {/* Session loading indicator */}
+            {sessionLoading && (
+              <div style={{ display:'flex', justifyContent:'center', padding:'60px 0', color:td, fontSize:13 }}>
+                Loading conversation...
+              </div>
+            )}
+
+            {!sessionLoading && messages.length === 0 && (
               <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'calc(100vh - 200px)', opacity:visible?1:0, transform:visible?'translateY(0)':'translateY(24px)', transition:'opacity 0.7s ease, transform 0.7s ease' }}>
                 <div style={{ position:'relative', marginBottom:32 }}>
                   <div style={{ animation:'logoFloat 4s ease-in-out infinite, logoGlow 4s ease-in-out infinite' }}>
@@ -472,7 +471,7 @@ export default function Assistant() {
               </div>
             )}
 
-            {messages.length > 0 && (
+            {!sessionLoading && messages.length > 0 && (
               <div style={{ paddingTop:32 }}>
                 {messages.map((m, i) => (
                   <div key={i} style={{ marginBottom:20, display:'flex', flexDirection: m.role==='user'?'row-reverse':'row', alignItems:'flex-start', gap:10, animation:'bubblePop 0.4s cubic-bezier(0.34,1.56,0.64,1) both' }}>
@@ -530,7 +529,6 @@ export default function Assistant() {
           </div>
         </div>
 
-        {/* INPUT BAR */}
         <div style={{ background:'rgba(8,8,9,0.97)', backdropFilter:'blur(20px)', borderTop:`1px solid ${border}`, padding:'16px 24px 20px', flexShrink:0 }}>
           <div style={{ maxWidth:720, margin:'0 auto' }}>
             <div style={{ position:'relative', animation: shake ? 'shake 0.4s ease' : 'none' }}>
@@ -559,7 +557,6 @@ export default function Assistant() {
         </div>
       </div>
 
-      {/* Mobile overlay */}
       {sidebarOpen && isMobile && (
         <div onClick={() => setSidebarOpen(false)} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', zIndex:40 }}/>
       )}
