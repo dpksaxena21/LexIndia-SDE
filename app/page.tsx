@@ -1,17 +1,19 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
 import { useAuth } from './auth/AuthContext'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import UserMenu from './components/UserMenu'
 
-function LogoMark({ size = 32, color = '#ffffff' }: { size?: number; color?: string }) {
+const API = 'https://lexindia-backend-production.up.railway.app'
+
+function LogoMark({ size = 24, color = '#ffffff' }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
-      <rect x="4" y="1"  width="5" height="5" rx="1" fill={color} opacity="0.25"/>
-      <rect x="4" y="7"  width="5" height="5" rx="1" fill={color} opacity="0.45"/>
+      <rect x="4" y="1" width="5" height="5" rx="1" fill={color} opacity="0.25"/>
+      <rect x="4" y="7" width="5" height="5" rx="1" fill={color} opacity="0.45"/>
       <rect x="4" y="13" width="5" height="5" rx="1" fill={color} opacity="0.65"/>
       <rect x="4" y="19" width="5" height="5" rx="1" fill={color} opacity="0.85"/>
       <rect x="4" y="25" width="5" height="5" rx="1" fill={color}/>
-      <rect x="12" y="7"  width="5" height="5" rx="1" fill={color} opacity="0.25"/>
+      <rect x="12" y="7" width="5" height="5" rx="1" fill={color} opacity="0.25"/>
       <rect x="12" y="13" width="5" height="5" rx="1" fill={color} opacity="0.5"/>
       <rect x="12" y="19" width="5" height="5" rx="1" fill={color} opacity="0.8"/>
       <rect x="12" y="25" width="5" height="5" rx="1" fill={color}/>
@@ -21,405 +23,472 @@ function LogoMark({ size = 32, color = '#ffffff' }: { size?: number; color?: str
   )
 }
 
-const DOTS = [
-  { cx: 0, cy: 0, op: 0.25 }, { cx: 0, cy: 1, op: 0.45 },
-  { cx: 0, cy: 2, op: 0.65 }, { cx: 0, cy: 3, op: 0.85 },
-  { cx: 0, cy: 4, op: 1.0  }, { cx: 1, cy: 1, op: 0.25 },
-  { cx: 1, cy: 2, op: 0.5  }, { cx: 1, cy: 3, op: 0.8  },
-  { cx: 1, cy: 4, op: 1.0  }, { cx: 2, cy: 4, op: 0.6  },
-  { cx: 3, cy: 4, op: 0.3  },
-]
-const STEP = 20, OX = 18, OY = 8
+type Message = { role: 'user' | 'assistant'; content: string; streaming?: boolean }
+type Session = { id: string; title: string; updated_at: string }
 
-function AnimatedIntro({ onDone }: { onDone: () => void }) {
-  const stageRef = useRef<HTMLDivElement>(null)
-  const [wordmark, setWordmark] = useState(false)
-  const [tagline, setTagline] = useState(false)
-
-  useEffect(() => {
-    const stage = stageRef.current
-    if (!stage) return
-    const els: HTMLDivElement[] = []
-    DOTS.forEach((d) => {
-      const el = document.createElement('div')
-      el.style.cssText = `position:absolute;width:14px;height:14px;border-radius:3px;background:#ffffff;left:${OX + d.cx * STEP}px;top:${OY + d.cy * STEP}px;opacity:0;transform:scale(0.3);transition:opacity 0.5s ease,transform 0.6s cubic-bezier(0.34,1.56,0.64,1);`
-      stage.appendChild(el)
-      els.push(el)
-    })
-    const timers: ReturnType<typeof setTimeout>[] = []
-    const sorted = [...els].map((el, i) => ({ el, i, dist: Math.sqrt(Math.pow(DOTS[i].cx - 1, 2) + Math.pow(DOTS[i].cy - 2, 2)) })).sort((a, b) => a.dist - b.dist)
-    sorted.forEach(({ el, i }, order) => { timers.push(setTimeout(() => { el.style.opacity = String(DOTS[i].op); el.style.transform = 'scale(1)' }, 200 + order * 80)) })
-    timers.push(setTimeout(() => { els.forEach(el => { el.style.transition = 'transform 0.3s ease'; el.style.transform = 'scale(1.15)' }) }, 1400))
-    timers.push(setTimeout(() => { els.forEach(el => { el.style.transform = 'scale(1)' }) }, 1700))
-    timers.push(setTimeout(() => setWordmark(true), 2000))
-    timers.push(setTimeout(() => setTagline(true), 2500))
-    timers.push(setTimeout(() => { els.forEach((el, i) => { setTimeout(() => { el.style.transition = 'opacity 0.4s ease,transform 0.4s ease'; el.style.opacity = '0'; el.style.transform = 'scale(0.5)' }, i * 30) }) }, 3000))
-    timers.push(setTimeout(() => onDone(), 3600))
-    return () => timers.forEach(clearTimeout)
-  }, [onDone])
-
-  return (
-    <div style={{ position:'fixed', inset:0, zIndex:50, background:'#080809', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:28 }}>
-      <div ref={stageRef} style={{ position:'relative', width:120, height:120 }}/>
-      <div style={{ display:'flex', alignItems:'baseline', gap:10, opacity: wordmark ? 1 : 0, transform: wordmark ? 'translateY(0)' : 'translateY(10px)', transition:'opacity 0.6s ease,transform 0.6s ease' }}>
-        <span style={{ fontSize:26, fontWeight:800, color:'#fff', letterSpacing:8, fontFamily:'system-ui' }}>LEX</span>
-        <span style={{ fontSize:26, fontWeight:200, color:'#fff', letterSpacing:8, fontFamily:'system-ui' }}>INDIA</span>
-      </div>
-      <div style={{ fontSize:10, letterSpacing:4, color:'#555', textTransform:'uppercase', fontFamily:'system-ui', opacity: tagline ? 1 : 0, transition:'opacity 0.5s ease' }}>AI for Justice. Built for India.</div>
-    </div>
-  )
+type Mode = {
+  id: string; name: string; tagline: string; color: string; system: string
+  suggestions: { emoji: string; text: string }[]
+  icon: React.ReactNode
 }
 
-function ParticleField({ dark }: { dark: boolean }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    let animId: number
-    const rgb = dark ? '255,255,255' : '0,0,0'
-    function init() { canvas!.width = window.innerWidth; canvas!.height = window.innerHeight }
-    init()
-    window.addEventListener('resize', init)
-    const particles = Array.from({ length: 70 }, () => ({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, vx: (Math.random() - 0.5) * 0.08, vy: (Math.random() - 0.5) * 0.08, r: Math.random() * 1.5 + 0.5, o: Math.random() * 0.4 + 0.1 }))
-    function draw() {
-      const W = canvas!.width, H = canvas!.height
-      ctx!.clearRect(0, 0, W, H)
-      particles.forEach(p => {
-        p.x += p.vx; p.y += p.vy
-        if (p.x < 0) p.x = W; if (p.x > W) p.x = 0
-        if (p.y < 0) p.y = H; if (p.y > H) p.y = 0
-        ctx!.beginPath(); ctx!.arc(p.x, p.y, p.r, 0, Math.PI * 2)
-        ctx!.fillStyle = `rgba(${rgb},${p.o})`; ctx!.fill()
-      })
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x, dy = particles[i].y - particles[j].y
-          const d = Math.sqrt(dx * dx + dy * dy)
-          if (d < 160) { ctx!.beginPath(); ctx!.moveTo(particles[i].x, particles[i].y); ctx!.lineTo(particles[j].x, particles[j].y); ctx!.strokeStyle = `rgba(${rgb},${0.15 * (1 - d / 160)})`; ctx!.lineWidth = 0.6; ctx!.stroke() }
-        }
+const MODES: Mode[] = [
+  {
+    id: 'lexchat', name: 'LexChat', tagline: 'Senior Advocate AI', color: '#C7A56A',
+    icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>,
+    system: `You are LexChat, a senior Indian advocate with 50 years of experience. Deep expertise in BNS, BNSS, IPC, CrPC, Indian Evidence Act, Constitution of India. Cite relevant sections and landmark cases. Give practical actionable advice an advocate can use in court.`,
+    suggestions: [
+      { emoji: '⚖️', text: 'Key differences between IPC and BNS?' },
+      { emoji: '🏛️', text: 'Bail provisions under BNSS 2023' },
+      { emoji: '📋', text: 'Grounds for anticipatory bail' },
+      { emoji: '🔍', text: 'Section 498A IPC — scope and misuse' },
+    ]
+  },
+  {
+    id: 'lexsearch', name: 'LexSearch', tagline: 'Case Law Research', color: '#6366f1',
+    icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="10" cy="10" r="7"/><line x1="15.5" y1="15.5" x2="21" y2="21"/></svg>,
+    system: '',
+    suggestions: [
+      { emoji: '🔍', text: 'Search bail judgments Supreme Court 2024' },
+      { emoji: '📚', text: 'Landmark cases on right to privacy' },
+      { emoji: '⚖️', text: 'Maintenance under Section 125 CrPC cases' },
+      { emoji: '🏛️', text: 'Constitutional validity of sedition law' },
+    ]
+  },
+  {
+    id: 'lexplain', name: 'LexPlain', tagline: 'Kanoon aasaan bhasha mein', color: '#10b981',
+    icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="8" r="1" fill="currentColor"/><line x1="12" y1="11" x2="12" y2="16"/></svg>,
+    system: `You are LexPlain. Explain Indian laws in simple Hinglish. Avoid jargon, use real examples. Structure: What is the law → What it means for you → What you can do. Remind users to consult a lawyer for their case.`,
+    suggestions: [
+      { emoji: '🏠', text: 'Tenant ke kya rights hain India mein?' },
+      { emoji: '👮', text: 'Police arrest kare toh kya karein?' },
+      { emoji: '💔', text: 'Divorce ka process kya hai?' },
+      { emoji: '🏭', text: 'Employer salary na de toh?' },
+    ]
+  },
+  {
+    id: 'lexconstitute', name: 'Constitution', tagline: 'Constitutional Law', color: '#8b5cf6',
+    icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M12 2L3 7v5c0 5 4 9 9 10 5-1 9-5 9-10V7l-9-5z"/></svg>,
+    system: `You are LexConstitute, an expert in Indian Constitutional Law. Cover Fundamental Rights, Directive Principles, constitutional bodies, writ jurisdiction, landmark SC judgments. Always cite Articles and cases like Kesavananda Bharati, Maneka Gandhi, etc.`,
+    suggestions: [
+      { emoji: '📜', text: 'Basic Structure doctrine explained' },
+      { emoji: '🗳️', text: 'Fundamental Rights and their limitations' },
+      { emoji: '⚖️', text: 'Article 32 vs Article 226 writs' },
+      { emoji: '🏛️', text: 'Emergency provisions Articles 352, 356, 360' },
+    ]
+  },
+  {
+    id: 'lexdraft', name: 'LexDraft', tagline: 'Draft Legal Documents', color: '#ec4899',
+    icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>,
+    system: `You are LexDraft, an expert Indian legal document drafter. Draft petitions, applications, agreements, notices and other legal documents. Use correct BNS/BNSS sections for post-July 2024, IPC/CrPC for pre-July 2024. Format properly with cause title, facts, grounds, prayer.`,
+    suggestions: [
+      { emoji: '📄', text: 'Draft a bail application for theft case' },
+      { emoji: '✉️', text: 'Legal notice for cheque bounce' },
+      { emoji: '🏠', text: 'Rent agreement for residential property' },
+      { emoji: '⚖️', text: 'Complaint under Section 138 NI Act' },
+    ]
+  },
+]
+
+function renderMarkdown(text: string) {
+  const c1 = '#ffffff'; const c2 = 'rgba(255,255,255,0.82)'
+  const c3 = 'rgba(255,255,255,0.08)'; const c4 = 'rgba(255,255,255,0.5)'
+  const bl = 'rgba(255,255,255,0.3)'
+  text = text.replace(/((?:^\|.+\|\n?)+)/gm, (block) => {
+    const rows = block.trim().split('\n').filter(r => r.trim())
+    let html = `<div style="overflow-x:auto;margin:12px 0;"><table style="width:100%;border-collapse:collapse;font-size:13px;">`
+    let isFirst = true
+    for (const row of rows) {
+      if (/^\|[-| :]+\|$/.test(row.trim())) continue
+      const cells = row.split('|').filter(c => c.trim())
+      if (isFirst) {
+        html += `<thead><tr>${cells.map(c => `<th style="padding:8px 12px;text-align:left;border-bottom:2px solid rgba(255,255,255,0.12);color:#fff;font-weight:600;font-size:12px;">${c.trim()}</th>`).join('')}</tr></thead><tbody>`
+        isFirst = false
+      } else {
+        html += `<tr>${cells.map(c => `<td style="padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.06);color:${c2};line-height:1.6;">${c.trim()}</td>`).join('')}</tr>`
       }
-      animId = requestAnimationFrame(draw)
     }
-    draw()
-    return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', init) }
-  }, [dark])
-  return <canvas ref={canvasRef} style={{ position:'fixed', inset:0, width:'100vw', height:'100vh', pointerEvents:'none' }}/>
+    html += `</tbody></table></div>`
+    return html
+  })
+  return text
+    .replace(/^### (.+)$/gm, `<h3 style="font-size:12px;font-weight:700;color:${c4};margin:16px 0 7px;letter-spacing:0.5px;text-transform:uppercase;">$1</h3>`)
+    .replace(/^## (.+)$/gm, `<h2 style="font-size:15px;font-weight:700;color:${c1};margin:18px 0 8px;border-bottom:1px solid ${c3};padding-bottom:5px;">$1</h2>`)
+    .replace(/^# (.+)$/gm, `<h1 style="font-size:18px;font-weight:800;color:${c1};margin:0 0 12px;">$1</h1>`)
+    .replace(/\*\*(.+?)\*\*/g, `<strong style="color:${c1};font-weight:700;">$1</strong>`)
+    .replace(/\*(.+?)\*/g, `<em style="color:${c2};">$1</em>`)
+    .replace(/^- (.+)$/gm, `<div style="display:flex;gap:8px;margin:5px 0;"><span style="color:${bl};font-size:9px;margin-top:5px;">&#9658;</span><span style="font-size:14px;color:${c2};line-height:1.7;">$1</span></div>`)
+    .replace(/^(\d+)\. (.+)$/gm, `<div style="display:flex;gap:8px;margin:5px 0;"><span style="color:${c4};font-size:12px;min-width:18px;font-weight:600;">$1.</span><span style="font-size:14px;color:${c2};line-height:1.7;">$2</span></div>`)
+    .replace(/\n\n/g, `<div style="height:8px"></div>`)
 }
 
-function Marquee({ dark }: { dark: boolean }) {
-  const items = ['LAW','·','TECHNOLOGY','·','INTELLIGENCE','·','TRUST','·','INDIA','·','27 CRORE JUDGMENTS','·','BNS','·','BNSS','·','IPC','·','CONSTITUTION OF INDIA','·','ECOURTS','·']
-  const doubled = [...items, ...items]
-  const dim = dark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.35)'
-  const dot = dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.15)'
-  const bdr = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'
-  return (
-    <div style={{ overflow:'hidden', borderTop:`1px solid ${bdr}`, borderBottom:`1px solid ${bdr}`, padding:'12px 0' }}>
-      <style>{`@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}.mtrack{animation:marquee 22s linear infinite;}.mtrack:hover{animation-play-state:paused;}`}</style>
-      <div className="mtrack" style={{ display:'flex', gap:'24px', width:'max-content', alignItems:'center' }}>
-        {doubled.map((item, i) => <span key={i} style={{ fontSize:'10px', letterSpacing:'2px', color: item === '·' ? dot : dim, whiteSpace:'nowrap', fontWeight: item === '·' ? 400 : 500 }}>{item}</span>)}
-      </div>
-    </div>
-  )
-}
-
-function StatCard({ target, suffix, label, index, textPrimary, textDim, border }: { target: number; suffix: string; label: string; index: number; textPrimary: string; textDim: string; border: string }) {
-  const [count, setCount] = useState(0)
-  const started = useRef(false)
+function StreamingMessage({ content, onDone, color }: { content: string; onDone: () => void; color: string }) {
+  const [displayed, setDisplayed] = useState('')
+  const [done, setDone] = useState(false)
+  const indexRef = useRef(0)
   useEffect(() => {
-    started.current = false; setCount(0)
-    const delay = setTimeout(() => {
-      if (started.current) return; started.current = true
-      const steps = 50, duration = 1800; let step = 0
-      const timer = setInterval(() => { step++; const eased = 1 - Math.pow(1 - step / steps, 3); setCount(Math.floor(eased * target)); if (step >= steps) { setCount(target); clearInterval(timer) } }, duration / steps)
-    }, 3800)
-    return () => clearTimeout(delay)
-  }, [target])
+    indexRef.current = 0; setDisplayed(''); setDone(false)
+    const interval = setInterval(() => {
+      if (indexRef.current < content.length) {
+        const chunk = Math.floor(Math.random() * 3) + 1
+        setDisplayed(content.slice(0, indexRef.current + chunk))
+        indexRef.current += chunk
+      } else { setDisplayed(content); setDone(true); onDone(); clearInterval(interval) }
+    }, 10)
+    return () => clearInterval(interval)
+  }, [content])
   return (
-    <div style={{ padding:'28px 16px', textAlign:'center', borderRight: index < 3 ? `1px solid ${border}` : 'none', transition:'border-color 0.3s' }}>
-      <div style={{ fontSize:28, fontWeight:800, color:textPrimary, marginBottom:4, transition:'color 0.3s', fontVariantNumeric:'tabular-nums' }}>{count}{suffix}</div>
-      <div style={{ fontSize:11, color:textDim, letterSpacing:1, transition:'color 0.3s' }}>{label}</div>
+    <div>
+      <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', lineHeight: 1.85 }} dangerouslySetInnerHTML={{ __html: renderMarkdown(displayed) }}/>
+      {!done && <span style={{ display: 'inline-block', width: 2, height: 14, background: color, marginLeft: 2, verticalAlign: 'middle', animation: 'cursorBlink 0.6s step-end infinite' }}/>}
     </div>
-  )
-}
-
-const S = 1.5, F = 0.12
-
-const icons: Record<string, React.ReactNode> = {
-  LexSearch: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="10" cy="10" r="7" fill="white" fillOpacity={F} stroke="white" strokeWidth={S} strokeLinecap="round"/><line x1="15.5" y1="15.5" x2="21" y2="21" stroke="white" strokeWidth={S} strokeLinecap="round"/></svg>,
-  LexChat: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" fill="white" fillOpacity={F} stroke="white" strokeWidth={S} strokeLinejoin="round"/></svg>,
-  LexDraft: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="white" fillOpacity={F} stroke="white" strokeWidth={S} strokeLinejoin="round"/><polyline points="14 2 14 8 20 8" stroke="white" strokeWidth={S} strokeLinejoin="round" fill="none"/></svg>,
-  LexVault: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" fill="white" fillOpacity={F} stroke="white" strokeWidth={S}/><path d="M7 11V7a5 5 0 0110 0v4" stroke="white" strokeWidth={S} strokeLinecap="round"/></svg>,
-  LexScan: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 7V4h3" stroke="white" strokeWidth={S} strokeLinecap="round"/><path d="M21 7V4h-3" stroke="white" strokeWidth={S} strokeLinecap="round"/><path d="M3 17v3h3" stroke="white" strokeWidth={S} strokeLinecap="round"/><path d="M21 17v3h-3" stroke="white" strokeWidth={S} strokeLinecap="round"/><rect x="6" y="7" width="12" height="10" rx="1" fill="white" fillOpacity={F}/><line x1="3" y1="12" x2="21" y2="12" stroke="white" strokeWidth={S} strokeLinecap="round"/></svg>,
-  LexPlain: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="white" fillOpacity={F} stroke="white" strokeWidth={S}/><circle cx="12" cy="8" r="1" fill="white"/><line x1="12" y1="11" x2="12" y2="16" stroke="white" strokeWidth={S} strokeLinecap="round"/></svg>,
-  LexPulse: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><polyline points="2 12 6 12 8 5 11 19 14 9 16 15 18 12 22 12" stroke="white" strokeWidth={S} strokeLinecap="round" strokeLinejoin="round"/></svg>,
-  LexPredict: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><polyline points="3 17 7 12 11 14 15 8 21 11" stroke="white" strokeWidth={S} strokeLinecap="round" strokeLinejoin="round"/></svg>,
-  LexTrack: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="white" fillOpacity={F} stroke="white" strokeWidth={S}/><polyline points="12 7 12 12 15 15" stroke="white" strokeWidth={S} strokeLinecap="round" strokeLinejoin="round"/></svg>,
-  LexCause: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" fill="white" fillOpacity={F} stroke="white" strokeWidth={S}/><line x1="3" y1="9" x2="21" y2="9" stroke="white" strokeWidth={S}/></svg>,
-  LexBench: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="4" fill="white" fillOpacity={F} stroke="white" strokeWidth={S}/><path d="M4 21v-1a8 8 0 0116 0v1" fill="white" fillOpacity={F} stroke="white" strokeWidth={S} strokeLinecap="round"/></svg>,
-  LexDebate: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M21 11a9 9 0 01-9 9" stroke="white" strokeWidth={S} strokeLinecap="round"/><path d="M3 13a9 9 0 019-9" stroke="white" strokeWidth={S} strokeLinecap="round"/></svg>,
-  LexConstitute: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7v5c0 5 4 9 9 10 5-1 9-5 9-10V7l-9-5z" fill="white" fillOpacity={F} stroke="white" strokeWidth={S} strokeLinejoin="round"/></svg>,
-  LexGlobe: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="white" fillOpacity={F} stroke="white" strokeWidth={S}/><line x1="3" y1="12" x2="21" y2="12" stroke="white" strokeWidth={S} strokeLinecap="round"/></svg>,
-  LexMap: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.5 2 6 4.5 6 7.5 6 12 12 20 12 20s6-8 6-12.5C18 4.5 15.5 2 12 2z" fill="white" fillOpacity={F} stroke="white" strokeWidth={S} strokeLinejoin="round"/></svg>,
-  LexVoice: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="9" y="2" width="6" height="11" rx="3" fill="white" fillOpacity={F} stroke="white" strokeWidth={S}/><path d="M5 11a7 7 0 0014 0" stroke="white" strokeWidth={S} strokeLinecap="round"/></svg>,
-}
-
-const MODULE_PATHS: Record<string, string> = {
-  LexSearch: '/research',
-  LexChat: '/assistant',
-  LexDraft: '/drafts',
-  LexScan: '/scan',
-  LexVault: '/vault',
-  LexPlain: '/assistant',
-  LexConstitute: '/assistant',
-  LexGlobe: '/assistant',
-  LexDebate: '/assistant',
-}
-
-const MODULE_GROUPS = [
-  {
-    label: 'Research & Intelligence',
-    color: '#6366f1',
-    modules: [
-      { name: 'LexSearch', desc: '27 crore judgments', live: true },
-      { name: 'LexPlain',  desc: 'Laws in simple language', live: true },
-      { name: 'LexPulse',  desc: 'Legal news feed', live: false },
-      { name: 'LexPredict',desc: 'Outcome predictor', live: false },
-    ]
-  },
-  {
-    label: 'Documents & Drafting',
-    color: '#f59e0b',
-    modules: [
-      { name: 'LexDraft', desc: '56 document types', live: true },
-      { name: 'LexScan',  desc: 'Document analysis', live: true },
-      { name: 'LexVault', desc: 'File storage', live: true },
-      { name: 'LexDebate', desc: 'Counter arguments', live: true },
-    ]
-  },
-  {
-    label: 'AI Assistant',
-    color: '#10b981',
-    modules: [
-      { name: 'LexChat',      desc: 'AI legal advisor', live: true },
-      { name: 'LexConstitute', desc: 'Constitutional law', live: true },
-      { name: 'LexGlobe', desc: 'International law', live: true },
-      { name: 'LexVoice',    desc: 'Regional languages', live: false },
-    ]
-  },
-  {
-    label: 'Court Tools',
-    color: '#ec4899',
-    modules: [
-      { name: 'LexTrack', desc: 'Live case updates', live: false },
-      { name: 'LexCause', desc: 'Daily cause list', live: false },
-      { name: 'LexBench', desc: 'Judge analysis', live: false },
-      { name: 'LexMap',   desc: 'Court locator', live: false },
-    ]
-  },
-]
-
-// Bottom nav for mobile
-function BottomNav({ dark }: { dark: boolean }) {
-  const bg = dark ? 'rgba(6,6,8,0.96)' : 'rgba(248,248,246,0.96)'
-  const border = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'
-  const active = dark ? '#ffffff' : '#0a0a0b'
-  const inactive = dark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)'
-  const path = typeof window !== 'undefined' ? window.location.pathname : '/'
-
-  const tabs = [
-    { label: 'Home', path: '/', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
-    { label: 'Search', path: '/research', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="10" cy="10" r="7"/><line x1="15.5" y1="15.5" x2="21" y2="21"/></svg> },
-    { label: 'Chat', path: '/assistant', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> },
-    { label: 'Draft', path: '/drafts', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> },
-    { label: 'More', path: '/dashboard', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg> },
-  ]
-
-  return (
-    <nav style={{ position:'fixed', bottom:0, left:0, right:0, background:bg, backdropFilter:'blur(20px)', borderTop:`1px solid ${border}`, display:'flex', zIndex:100, paddingBottom:'env(safe-area-inset-bottom, 8px)' }}>
-      {tabs.map(tab => {
-        const isActive = path === tab.path
-        return (
-          <button key={tab.path} onClick={() => window.location.href = tab.path} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:3, padding:'10px 0 6px', background:'transparent', border:'none', cursor:'pointer', color: isActive ? active : inactive, transition:'color 0.15s' }}>
-            {tab.icon}
-            <span style={{ fontSize:10, fontWeight: isActive ? 600 : 400, letterSpacing:'0.3px' }}>{tab.label}</span>
-          </button>
-        )
-      })}
-    </nav>
   )
 }
 
 export default function Home() {
-  const [winW, setWinW] = useState(1200)
-  useEffect(() => { setWinW(window.innerWidth); const h = () => setWinW(window.innerWidth); window.addEventListener('resize',h); return () => window.removeEventListener('resize',h) }, [])
-  const { user } = useAuth()
-  const [intro, setIntro] = useState(true)
-  const [page, setPage] = useState(false)
-  const [dark, setDark] = useState(true)
+  const { token, user } = useAuth()
+  const [mode, setMode] = useState<Mode>(MODES[0])
+  const [messages, setMessages] = useState<Message[]>([])
+  const [streamingIndex, setStreamingIndex] = useState<number | null>(null)
+  const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [sessionId, setSessionId] = useState<string | null>(null)
+  const [sessions, setSessions] = useState<Session[]>([])
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [width, setWidth] = useState(1200)
+  const bottomRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
 
-  const handleDone = () => { setPage(true); setTimeout(() => setIntro(false), 700) }
+  useEffect(() => {
+    setWidth(window.innerWidth)
+    const h = () => setWidth(window.innerWidth)
+    window.addEventListener('resize', h)
+    return () => window.removeEventListener('resize', h)
+  }, [])
 
-  const isMobile = winW < 768
+  const isMobile = width < 768
 
-  const bg          = dark ? '#080809'                : '#F8F8F6'
-  const bgSurface   = dark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.03)'
-  const bgHover     = dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)'
-  const border      = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)'
-  const borderHover = dark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.2)'
-  const textPrimary = dark ? '#ffffff'                : '#0a0a0b'
-  const textMuted   = dark ? 'rgba(255,255,255,0.4)'  : 'rgba(0,0,0,0.55)'
-  const textDim     = dark ? 'rgba(255,255,255,0.2)'  : 'rgba(0,0,0,0.4)'
-  const navBg       = dark ? 'rgba(8,8,9,0.85)'       : 'rgba(248,248,246,0.85)'
-  const btnBg       = dark ? '#ffffff'                : '#0a0a0b'
-  const btnText     = dark ? '#000000'                : '#ffffff'
-  const logoColor   = dark ? '#ffffff'                : '#0a0a0b'
-  const pillBorder  = dark ? 'rgba(255,255,255,0.1)'  : 'rgba(0,0,0,0.12)'
-  const toggleBg    = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'
-  const toggleColor = dark ? 'rgba(255,255,255,0.6)'  : 'rgba(0,0,0,0.6)'
-  const heroGradient = dark ? 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.4) 100%)' : 'linear-gradient(180deg, #0a0a0b 0%, rgba(10,10,11,0.75) 100%)'
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages, loading])
+
+  const fetchSessions = useCallback(async () => {
+    if (!token) return
+    try {
+      const res = await fetch(`${API}/api/chat/sessions`, { headers: { Authorization: `Bearer ${token}` } })
+      const data = await res.json()
+      setSessions(data.sessions || [])
+    } catch {}
+  }, [token])
+
+  useEffect(() => { fetchSessions() }, [fetchSessions])
+
+  const switchMode = (m: Mode) => {
+    if (m.id === 'lexsearch') { window.location.href = '/research'; return }
+    if (m.id === 'lexdraft') { window.location.href = '/drafts'; return }
+    setMode(m); setMessages([]); setSessionId(null); setStreamingIndex(null)
+  }
+
+  const newChat = () => { setMessages([]); setSessionId(null); setStreamingIndex(null); setSidebarOpen(false) }
+
+  const loadSession = async (sid: string) => {
+    if (!token) return
+    try {
+      const res = await fetch(`${API}/api/chat/sessions/${sid}`, { headers: { Authorization: `Bearer ${token}` } })
+      const data = await res.json()
+      setMessages((data.messages || []).map((m: any) => ({ role: m.role, content: m.content })))
+      setSessionId(sid); setSidebarOpen(false)
+    } catch {}
+  }
+
+  const deleteSession = async (sid: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!token) return
+    await fetch(`${API}/api/chat/sessions/${sid}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
+    setSessions(prev => prev.filter(s => s.id !== sid))
+    if (sessionId === sid) newChat()
+  }
+
+  const send = async (text?: string) => {
+    const msg = text || input.trim()
+    if (!msg || loading) return
+    setInput('')
+    if (inputRef.current) inputRef.current.style.height = 'auto'
+    const userMsg: Message = { role: 'user', content: msg }
+    const newMessages = [...messages, userMsg]
+    setMessages(newMessages)
+    setLoading(true)
+    try {
+      const res = await fetch(`${API}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ message: msg, history: messages.map(m => ({ role: m.role, content: m.content })), session_id: sessionId, system: mode.system }),
+      })
+      const data = await res.json()
+      if (data.session_id && data.session_id !== sessionId) { setSessionId(data.session_id); fetchSessions() }
+      const assistantMsg: Message = { role: 'assistant', content: data.reply, streaming: true }
+      const withAssistant = [...newMessages, assistantMsg]
+      setMessages(withAssistant)
+      setStreamingIndex(withAssistant.length - 1)
+    } catch { setMessages([...newMessages, { role: 'assistant', content: 'Server error. Please try again.' }]) }
+    setLoading(false)
+  }
+
+  const bg = '#080809'; const sidebarBg = '#060608'
+  const surface = '#0d0d0f'; const border = 'rgba(255,255,255,0.08)'
+  const tp = '#ffffff'; const tm = 'rgba(255,255,255,0.6)'; const td = 'rgba(255,255,255,0.3)'
 
   return (
-    <>
-      {intro && <AnimatedIntro onDone={handleDone} />}
-      <main style={{ opacity: page ? 1 : 0, transform: page ? 'translateY(0)' : 'translateY(12px)', transition:'opacity 0.7s ease,transform 0.7s ease,background 0.4s ease', minHeight:'100vh', background:bg, color:textPrimary, fontFamily:'system-ui,sans-serif', position:'relative', paddingBottom: isMobile ? 80 : 0 }}>
-        <ParticleField dark={dark} />
-        <div style={{ position:'relative', zIndex:1 }}>
+    <main style={{ height: '100vh', background: bg, color: tp, fontFamily: 'system-ui,sans-serif', display: 'flex', overflow: 'hidden' }}>
+      <style>{`
+        textarea { resize: none; }
+        ::-webkit-scrollbar { width: 3px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes bubblePop { from{opacity:0;transform:scale(0.92) translateY(8px)} to{opacity:1;transform:scale(1) translateY(0)} }
+        @keyframes pulse { 0%,100%{opacity:0.3;transform:scale(0.8)} 50%{opacity:1;transform:scale(1)} }
+        @keyframes cursorBlink { 50%{opacity:0} }
+        @keyframes logoFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+        .session-item:hover { background: rgba(255,255,255,0.06) !important; }
+        .mode-btn:hover { background: rgba(255,255,255,0.08) !important; }
+        .suggestion-btn:hover { border-color: rgba(255,255,255,0.2) !important; background: rgba(255,255,255,0.06) !important; transform: translateY(-2px); }
+      `}</style>
 
-          {/* NAVBAR */}
-          <nav style={{ borderBottom:`1px solid ${border}`, padding: isMobile ? '14px 16px' : '14px 40px', display:'flex', alignItems:'center', justifyContent:'space-between', backdropFilter:'blur(12px)', background:navBg, position:'sticky', top:0, zIndex:10, transition:'background 0.4s ease,border-color 0.4s ease' }}>
-            <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-              <LogoMark size={32} color={logoColor}/>
-              <div style={{ display:'flex', alignItems:'baseline', gap:6 }}>
-                <span style={{ fontSize:15, fontWeight:800, color:textPrimary, letterSpacing:4, transition:'color 0.3s' }}>LEX</span>
-                <span style={{ fontSize:15, fontWeight:200, color:textPrimary, letterSpacing:4, transition:'color 0.3s' }}>INDIA</span>
+      {/* SIDEBAR */}
+      {(!isMobile || sidebarOpen) && (
+        <div style={{ width: isMobile ? '100%' : 260, flexShrink: 0, background: sidebarBg, borderRight: `1px solid ${border}`, display: 'flex', flexDirection: 'column', position: isMobile ? 'fixed' : 'relative', inset: isMobile ? 0 : 'auto', zIndex: 50 }}>
+          {/* Logo */}
+          <div style={{ padding: '16px 14px', borderBottom: `1px solid ${border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <LogoMark size={22} color={tp}/>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
+                <span style={{ fontSize: 14, fontWeight: 800, color: tp, letterSpacing: 3 }}>LEX</span>
+                <span style={{ fontSize: 14, fontWeight: 200, color: tp, letterSpacing: 3 }}>INDIA</span>
               </div>
             </div>
-            <div style={{ display:'flex', alignItems:'center', gap:16, fontSize:13, color:textMuted }}>
-              {!isMobile && (
-                <>
-                  <a href='/research' style={{ color:'inherit', textDecoration:'none' }}>Research</a>
-                  <a href='/assistant' style={{ color:'inherit', textDecoration:'none' }}>Chat</a>
-                  <a href='/drafts' style={{ color:'inherit', textDecoration:'none' }}>Draft</a>
-                  <a href='/scan' style={{ color:'inherit', textDecoration:'none' }}>Scan</a>
-                </>
-              )}
-              <button onClick={() => setDark(d => !d)} style={{ background:toggleBg, border:`1px solid ${border}`, borderRadius:20, padding:'6px 14px', cursor:'pointer', fontSize:12, color:toggleColor, fontFamily:'inherit', transition:'all 0.3s', letterSpacing:1 }}>
-                {dark ? '○ Light' : '● Dark'}
+            {isMobile && <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none', color: td, cursor: 'pointer', fontSize: 18 }}>✕</button>}
+          </div>
+
+          {/* New Chat */}
+          <div style={{ padding: '10px 10px 6px' }}>
+            <button onClick={newChat} style={{ width: '100%', padding: '9px 12px', background: 'rgba(199,165,106,0.08)', border: '1px solid rgba(199,165,106,0.2)', borderRadius: 8, color: '#C7A56A', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              New Chat
+            </button>
+          </div>
+
+          {/* Modes */}
+          <div style={{ padding: '6px 10px' }}>
+            <div style={{ fontSize: 10, color: td, letterSpacing: '1px', textTransform: 'uppercase', padding: '4px 2px 6px', fontWeight: 600 }}>Modules</div>
+            {MODES.map(m => (
+              <button key={m.id} className="mode-btn" onClick={() => switchMode(m)}
+                style={{ width: '100%', padding: '9px 10px', background: mode.id === m.id ? 'rgba(255,255,255,0.08)' : 'transparent', border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 10, marginBottom: 2, transition: 'background 0.15s' }}>
+                <span style={{ color: mode.id === m.id ? m.color : td, flexShrink: 0 }}>{m.icon}</span>
+                <div style={{ textAlign: 'left', flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: mode.id === m.id ? 700 : 400, color: mode.id === m.id ? tp : tm }}>{m.name}</div>
+                </div>
+                {mode.id === m.id && <div style={{ width: 6, height: 6, borderRadius: '50%', background: m.color, flexShrink: 0 }}/>}
               </button>
-              {user ? <UserMenu /> : (
-                <button onClick={() => window.location.href = '/login'} style={{ background:btnBg, color:btnText, border:'none', padding:'8px 20px', borderRadius:20, fontSize:13, fontWeight:700, cursor:'pointer', transition:'background 0.3s,color 0.3s' }}>
-                  Sign In
+            ))}
+            <div style={{ height: 1, background: border, margin: '8px 0' }}/>
+            <button className="mode-btn" onClick={() => window.location.href = '/vault'} style={{ width: '100%', padding: '9px 10px', background: 'transparent', border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 10, marginBottom: 2 }}>
+              <span style={{ color: td }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+              <span style={{ fontSize: 13, color: tm }}>LexVault</span>
+            </button>
+            <button className="mode-btn" onClick={() => window.location.href = '/scan'} style={{ width: '100%', padding: '9px 10px', background: 'transparent', border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ color: td }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M3 7V4h3"/><path d="M21 7V4h-3"/><path d="M3 17v3h3"/><path d="M21 17v3h-3"/><line x1="3" y1="12" x2="21" y2="12"/></svg></span>
+              <span style={{ fontSize: 13, color: tm }}>LexScan</span>
+            </button>
+          </div>
+
+          {/* Sessions */}
+          {sessions.length > 0 && (
+            <div style={{ flex: 1, overflow: 'auto', padding: '0 10px', marginTop: 4 }}>
+              <div style={{ fontSize: 10, color: td, letterSpacing: '1px', textTransform: 'uppercase', padding: '4px 2px 6px', fontWeight: 600 }}>Recent</div>
+              {sessions.slice(0, 20).map(s => (
+                <div key={s.id} className="session-item" onClick={() => loadSession(s.id)}
+                  style={{ padding: '8px 10px', borderRadius: 8, cursor: 'pointer', background: sessionId === s.id ? 'rgba(255,255,255,0.08)' : 'transparent', marginBottom: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 12, color: tm, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{s.title}</span>
+                  <button onClick={e => deleteSession(s.id, e)} style={{ flexShrink: 0, background: 'none', border: 'none', color: td, cursor: 'pointer', fontSize: 11, padding: '1px 4px' }}>✕</button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Bottom user */}
+          <div style={{ padding: '10px 12px', borderTop: `1px solid ${border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            {user ? (
+              <>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: tp }}>{user.name}</div>
+                  <div style={{ fontSize: 10, color: td }}>{user.email}</div>
+                </div>
+                <UserMenu/>
+              </>
+            ) : (
+              <button onClick={() => window.location.href = '/login'} style={{ width: '100%', padding: '8px', background: 'rgba(255,255,255,0.06)', border: `1px solid ${border}`, borderRadius: 8, color: tp, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
+                Sign In
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* MAIN */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
+
+        {/* TOP NAV */}
+        <nav style={{ borderBottom: `1px solid ${border}`, padding: '0 16px', height: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(8,8,9,0.92)', backdropFilter: 'blur(12px)', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {isMobile && (
+              <button onClick={() => setSidebarOpen(true)} style={{ background: 'none', border: 'none', color: td, cursor: 'pointer', padding: 4 }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+              </button>
+            )}
+            <span style={{ color: mode.color, display: 'flex', alignItems: 'center' }}>{mode.icon}</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: mode.color }}>{mode.name}</span>
+            {!isMobile && <span style={{ fontSize: 12, color: td }}>— {mode.tagline}</span>}
+          </div>
+
+          {/* Desktop mode tabs */}
+          {!isMobile && (
+            <div style={{ display: 'flex', gap: 2, background: 'rgba(255,255,255,0.03)', border: `1px solid ${border}`, borderRadius: 10, padding: 3 }}>
+              {MODES.map(m => (
+                <button key={m.id} className="mode-btn" onClick={() => switchMode(m)}
+                  style={{ padding: '5px 12px', background: mode.id === m.id ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', borderRadius: 7, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: mode.id === m.id ? 700 : 400, color: mode.id === m.id ? m.color : td, transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <span>{m.icon}</span>{m.name}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <a href="/about" style={{ fontSize: 12, color: td, textDecoration: 'none' }}>About</a>
+            {!isMobile && user && <UserMenu/>}
+            {!isMobile && !user && (
+              <button onClick={() => window.location.href = '/login'} style={{ padding: '6px 16px', background: '#C7A56A', color: '#000', border: 'none', borderRadius: 16, fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Sign In</button>
+            )}
+          </div>
+        </nav>
+
+        {/* Mobile mode tabs */}
+        {isMobile && (
+          <div style={{ display: 'flex', overflowX: 'auto', padding: '8px 12px', gap: 6, borderBottom: `1px solid ${border}`, background: sidebarBg, flexShrink: 0 }}>
+            {MODES.map(m => (
+              <button key={m.id} onClick={() => switchMode(m)}
+                style={{ padding: '6px 14px', background: mode.id === m.id ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${mode.id === m.id ? 'rgba(255,255,255,0.2)' : border}`, borderRadius: 20, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: mode.id === m.id ? 700 : 400, color: mode.id === m.id ? m.color : td, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                {m.name}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* CHAT */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0 16px' }}>
+          <div style={{ maxWidth: 740, margin: '0 auto', paddingBottom: 24 }}>
+
+            {/* Empty state */}
+            {messages.length === 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 220px)' }}>
+                <div style={{ width: 60, height: 60, borderRadius: 16, background: `rgba(199,165,106,0.08)`, border: `1px solid rgba(199,165,106,0.15)`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, animation: 'logoFloat 4s ease-in-out infinite' }}>
+                  <LogoMark size={28} color="#C7A56A"/>
+                </div>
+                <h1 style={{ fontSize: isMobile ? 22 : 28, fontWeight: 800, color: tp, letterSpacing: -0.5, marginBottom: 6, textAlign: 'center', animation: 'fadeUp 0.5s ease both' }}>
+                  {mode.id === 'lexchat' ? 'LexIndia AI' : mode.name}
+                </h1>
+                <p style={{ fontSize: 14, color: tm, marginBottom: 8, textAlign: 'center', animation: 'fadeUp 0.5s ease 0.1s both' }}>{mode.tagline}</p>
+                <p style={{ fontSize: 12, color: td, marginBottom: 36, textAlign: 'center', animation: 'fadeUp 0.5s ease 0.15s both' }}>Powered by Claude AI · Indian Law Specialist</p>
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(2,1fr)', gap: 8, width: '100%', maxWidth: 540 }}>
+                  {mode.suggestions.map((s, i) => (
+                    <button key={i} className="suggestion-btn" onClick={() => send(s.text)}
+                      style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${border}`, borderRadius: 12, padding: '14px', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', transition: 'all 0.2s', animation: `fadeUp 0.5s ease ${0.2 + i * 0.07}s both`, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <span style={{ fontSize: 20 }}>{s.emoji}</span>
+                      <div style={{ fontSize: 12, color: tm, lineHeight: 1.5 }}>{s.text}</div>
+                    </button>
+                  ))}
+                </div>
+                {!user && (
+                  <p style={{ fontSize: 11, color: td, marginTop: 32, textAlign: 'center', animation: 'fadeUp 0.5s ease 0.5s both' }}>
+                    <button onClick={() => window.location.href = '/login'} style={{ background: 'none', border: 'none', color: '#C7A56A', cursor: 'pointer', fontFamily: 'inherit', fontSize: 11, textDecoration: 'underline' }}>Sign in</button>
+                    {' '}to save your conversations
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Messages */}
+            {messages.length > 0 && (
+              <div style={{ paddingTop: 24 }}>
+                {messages.map((m, i) => (
+                  <div key={i} style={{ marginBottom: 20, display: 'flex', flexDirection: m.role === 'user' ? 'row-reverse' : 'row', alignItems: 'flex-start', gap: 10, animation: 'bubblePop 0.35s cubic-bezier(0.34,1.56,0.64,1) both' }}>
+                    {m.role === 'assistant' && (
+                      <div style={{ flexShrink: 0, marginTop: 3, width: 28, height: 28, borderRadius: 8, background: 'rgba(199,165,106,0.1)', border: '1px solid rgba(199,165,106,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <LogoMark size={14} color="#C7A56A"/>
+                      </div>
+                    )}
+                    {m.role === 'user' && (
+                      <div style={{ flexShrink: 0, marginTop: 3, width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                      </div>
+                    )}
+                    <div style={{ maxWidth: m.role === 'user' ? '70%' : '90%' }}>
+                      <div style={{ background: m.role === 'user' ? 'rgba(255,255,255,0.07)' : surface, border: `1px solid ${m.role === 'assistant' ? 'rgba(199,165,106,0.12)' : border}`, borderRadius: m.role === 'user' ? '14px 4px 14px 14px' : '4px 14px 14px 14px', padding: '13px 17px' }}>
+                        {m.role === 'user' ? (
+                          <div style={{ fontSize: 14, color: tp, lineHeight: 1.7 }}>{m.content}</div>
+                        ) : m.streaming && i === streamingIndex ? (
+                          <StreamingMessage content={m.content} color={mode.color} onDone={() => { setStreamingIndex(null); setMessages(prev => prev.map((msg, idx) => idx === i ? { ...msg, streaming: false } : msg)) }}/>
+                        ) : (
+                          <div style={{ fontSize: 14, color: tm, lineHeight: 1.85 }} dangerouslySetInnerHTML={{ __html: renderMarkdown(m.content) }}/>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {loading && (
+                  <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+                    <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(199,165,106,0.1)', border: '1px solid rgba(199,165,106,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <LogoMark size={14} color="#C7A56A"/>
+                    </div>
+                    <div style={{ background: surface, border: '1px solid rgba(199,165,106,0.12)', borderRadius: '4px 14px 14px 14px', padding: '16px 20px' }}>
+                      <div style={{ display: 'flex', gap: 5 }}>
+                        {[0,1,2].map(i => <div key={i} style={{ width: 7, height: 7, borderRadius: '50%', background: mode.color, animation: `pulse 1.2s ease-in-out ${i * 0.18}s infinite` }}/>)}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            <div ref={bottomRef}/>
+          </div>
+        </div>
+
+        {/* INPUT */}
+        <div style={{ background: 'rgba(8,8,9,0.97)', backdropFilter: 'blur(20px)', borderTop: `1px solid ${border}`, padding: `12px 16px ${isMobile ? '76px' : '16px'}`, flexShrink: 0 }}>
+          <div style={{ maxWidth: 740, margin: '0 auto' }}>
+            <div style={{ position: 'relative' }}>
+              <textarea ref={inputRef} value={input} onChange={e => setInput(e.target.value)} rows={1}
+                placeholder={`Ask ${mode.name} anything about Indian law...`}
+                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
+                style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: `1px solid ${input ? 'rgba(199,165,106,0.4)' : border}`, borderRadius: 14, padding: '13px 56px 13px 18px', fontSize: 14, color: tp, fontFamily: 'inherit', outline: 'none', transition: 'border-color 0.2s', lineHeight: 1.6, maxHeight: 140, overflowY: 'auto', resize: 'none', boxSizing: 'border-box' }}
+                onFocus={e => e.target.style.borderColor = 'rgba(199,165,106,0.5)'}
+                onBlur={e => e.target.style.borderColor = input ? 'rgba(199,165,106,0.4)' : border}
+                onInput={e => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, 140) + 'px' }}
+              />
+              <button onClick={() => send()} disabled={loading || !input.trim()} style={{ position: 'absolute', right: 8, bottom: 8, background: input.trim() && !loading ? '#C7A56A' : 'rgba(255,255,255,0.08)', color: input.trim() && !loading ? '#000' : 'rgba(255,255,255,0.2)', border: 'none', borderRadius: 10, width: 38, height: 38, cursor: input.trim() && !loading ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+              <span style={{ fontSize: 11, color: td }}>LexIndia AI · Indian Law · Powered by Claude</span>
+              {messages.length > 0 && (
+                <button onClick={newChat} style={{ background: 'transparent', border: 'none', fontSize: 11, color: td, cursor: 'pointer', fontFamily: 'inherit' }}
+                  onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.color = tp}
+                  onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.color = td}>
+                  New chat
                 </button>
               )}
             </div>
-          </nav>
-
-          {/* HERO */}
-          <section style={{ maxWidth:720, margin:'0 auto', padding: isMobile ? '64px 24px 48px' : '96px 24px 72px', textAlign:'center' }}>
-            <style>{`
-              @keyframes floatPill{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-              @keyframes modIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-            `}</style>
-            <div style={{ display:'inline-flex', alignItems:'center', gap:8, border:`1px solid ${pillBorder}`, borderRadius:20, padding:'5px 16px', fontSize:12, color:textMuted, marginBottom:40, letterSpacing:1, animation:'floatPill 3s ease-in-out infinite' }}>
-              <span style={{ width:6, height:6, borderRadius:'50%', background:'#3fb950', display:'inline-block', boxShadow:'0 0 6px #3fb950' }}/>
-              10 modules live — lexsindia.com
-            </div>
-            <h1 style={{ fontSize:'clamp(36px, 6vw, 68px)', fontWeight:800, lineHeight:1.08, letterSpacing:-2, marginBottom:24, backgroundImage:heroGradient, WebkitBackgroundClip:'text' as const, WebkitTextFillColor:'transparent', backgroundClip:'text' as const, display:'block' }}>
-              AI Legal Research<br/>for Indian<br/>Advocates.
-            </h1>
-            <p style={{ fontSize:17, color:textMuted, lineHeight:1.7, maxWidth:520, margin:'0 auto 44px', transition:'color 0.3s' }}>
-              Research. Drafting. Case tracking. File storage.<br/>AI assistance. All in one workspace.
-            </p>
-            <div style={{ display:'flex', gap:12, justifyContent:'center', flexWrap:'wrap' }}>
-              <button onClick={() => window.location.href = '/research'} style={{ background:btnBg, color:btnText, border:'none', padding:'13px 28px', borderRadius:24, fontSize:14, fontWeight:700, cursor:'pointer', transition:'transform 0.15s ease,box-shadow 0.15s ease,background 0.3s,color 0.3s' }}
-                onMouseEnter={e => { const b=e.currentTarget as HTMLButtonElement; b.style.transform='scale(1.05)'; b.style.boxShadow=dark?'0 8px 24px rgba(255,255,255,0.15)':'0 8px 24px rgba(0,0,0,0.15)' }}
-                onMouseLeave={e => { const b=e.currentTarget as HTMLButtonElement; b.style.transform='scale(1)'; b.style.boxShadow='none' }}>
-                Start Researching Free
-              </button>
-              <button onClick={() => window.open('https://github.com/dpksaxena21/LexIndia-SDE', '_blank')} style={{ background:'transparent', color:textMuted, border:`1px solid ${pillBorder}`, padding:'13px 28px', borderRadius:24, fontSize:14, cursor:'pointer', transition:'all 0.2s' }}
-                onMouseEnter={e => { const b=e.currentTarget as HTMLButtonElement; b.style.borderColor=borderHover; b.style.color=textPrimary }}
-                onMouseLeave={e => { const b=e.currentTarget as HTMLButtonElement; b.style.borderColor=pillBorder; b.style.color=textMuted }}>
-                View on GitHub →
-              </button>
-            </div>
-          </section>
-
-          <Marquee dark={dark}/>
-
-          {/* STATS */}
-          <section style={{ maxWidth:640, margin:'64px auto', padding:'0 24px' }}>
-            <div style={{ display:'grid', gridTemplateColumns: isMobile ? 'repeat(2,1fr)' : 'repeat(4,1fr)', border:`1px solid ${border}`, borderRadius:16, background:bgSurface, backdropFilter:'blur(8px)', transition:'background 0.3s,border-color 0.3s' }}>
-              {[
-                { target:27, suffix:'Cr+', l:'Judgments' },
-                { target:10, suffix:'', l:'Live Modules' },
-                { target:4,  suffix:'',    l:'APIs' },
-                { target:56, suffix:'',    l:'Doc Types' },
-              ].map((s, i) => <StatCard key={i} index={i} target={s.target} suffix={s.suffix} label={s.l} textPrimary={textPrimary} textDim={textDim} border={border}/>)}
-            </div>
-          </section>
-
-          <Marquee dark={dark}/>
-
-          {/* MODULE GROUPS */}
-          <section style={{ maxWidth:960, margin:'64px auto', padding:'0 24px' }}>
-            <p style={{ textAlign:'center', fontSize:10, letterSpacing:4, color:textDim, textTransform:'uppercase', marginBottom:48, transition:'color 0.3s' }}>16 Modules · 10 Live</p>
-
-            {MODULE_GROUPS.map((group, gi) => (
-              <div key={group.label} style={{ marginBottom:48 }}>
-                {/* Group header */}
-                <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:16 }}>
-                  <div style={{ width:3, height:16, borderRadius:2, background:group.color }}/>
-                  <span style={{ fontSize:11, fontWeight:700, color:textMuted, letterSpacing:'1.5px', textTransform:'uppercase' }}>{group.label}</span>
-                  <div style={{ flex:1, height:'1px', background:border }}/>
-                  <span style={{ fontSize:10, color:textDim }}>{group.modules.filter(m => m.live).length}/{group.modules.length} live</span>
-                </div>
-
-                {/* Module cards */}
-                <div style={{ display:'grid', gridTemplateColumns: isMobile ? 'repeat(2,1fr)' : 'repeat(4,1fr)', gap:8 }}>
-                  {group.modules.map((m, idx) => {
-                    const hasPath = !!MODULE_PATHS[m.name]
-                    return (
-                      <div key={m.name}
-                        onClick={() => { if (hasPath) window.location.href = MODULE_PATHS[m.name] }}
-                        style={{ background:bgSurface, border:`1px solid ${m.live ? border : 'rgba(255,255,255,0.04)'}`, borderRadius:10, padding:'18px', cursor: hasPath ? 'pointer' : 'default', transition:'all 0.2s', animation:`modIn 0.4s ease ${(gi * 4 + idx) * 0.04}s both`, opacity: m.live ? 1 : 0.45, position:'relative' }}
-                        onMouseEnter={e => { if (hasPath) { const el=e.currentTarget as HTMLDivElement; el.style.background=bgHover; el.style.borderColor=group.color+'44'; el.style.transform='translateY(-2px)' } }}
-                        onMouseLeave={e => { if (hasPath) { const el=e.currentTarget as HTMLDivElement; el.style.background=bgSurface; el.style.borderColor=m.live?border:'rgba(255,255,255,0.04)'; el.style.transform='translateY(0)' } }}>
-                        <div style={{ marginBottom:10, opacity: m.live ? 1 : 0.5 }}>{icons[m.name]}</div>
-                        <div style={{ fontSize:12, fontWeight:700, color:textPrimary, marginBottom:3, transition:'color 0.3s' }}>{m.name}</div>
-                        <div style={{ fontSize:11, color:textMuted, transition:'color 0.3s' }}>{m.desc}</div>
-                        {m.live && hasPath && (
-                          <div style={{ position:'absolute', top:10, right:10, width:6, height:6, borderRadius:'50%', background:group.color, boxShadow:`0 0 6px ${group.color}` }}/>
-                        )}
-                        {!m.live && (
-                          <div style={{ position:'absolute', top:8, right:8, fontSize:9, color:textDim, letterSpacing:'0.5px', fontWeight:600 }}>SOON</div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            ))}
-          </section>
-
-          <Marquee dark={dark}/>
-
-          {/* FOOTER */}
-          <footer style={{ borderTop:`1px solid ${border}`, padding: isMobile ? '20px 16px' : '28px 40px', display:'flex', alignItems:'center', justifyContent: isMobile ? 'center' : 'space-between', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 12 : 0, transition:'border-color 0.3s' }}>
-            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-              <LogoMark size={20} color={logoColor}/>
-              <span style={{ fontSize:12, color:textDim, letterSpacing:2, transition:'color 0.3s' }}>LEXINDIA</span>
-            </div>
-            {!isMobile && <span style={{ fontSize:11, color:textDim, letterSpacing:1, transition:'color 0.3s' }}>LAW · TECHNOLOGY · INTELLIGENCE · TRUST · INDIA</span>}
-            <span style={{ fontSize:11, color:textDim, transition:'color 0.3s' }}>Built by Deepak Saxena</span>
-          </footer>
-
+          </div>
         </div>
-      </main>
-
-      {/* MOBILE BOTTOM NAV */}
-      {isMobile && <BottomNav dark={dark}/>}
-    </>
+      </div>
+    </main>
   )
 }

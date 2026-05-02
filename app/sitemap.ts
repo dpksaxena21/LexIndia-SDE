@@ -9,6 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: 'https://lexsindia.com/scan', lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
     { url: 'https://lexsindia.com/vault', lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
     { url: 'https://lexsindia.com/plain', lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    { url: 'https://lexsindia.com/about', lastModified: new Date(), changeFrequency: 'monthly' as const, priority: 0.7 },
     { url: 'https://lexsindia.com/login', lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
     { url: 'https://lexsindia.com/register', lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
   ]
