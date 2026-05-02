@@ -311,7 +311,10 @@ export default function LexVault() {
     const isMenuOpen = activeMenuId === item.id
     return (
       <div className="vault-item" onClick={() => openPreview(item)}
-        style={{ background: surface, border: `1px solid ${border}`, borderRadius: 10, padding: '14px', cursor: 'pointer', transition: 'all 0.15s', position: 'relative', animation: 'fadeIn 0.2s ease' }}>
+        style={{ background: surface, border: `1px solid ${border}`, borderRadius: 10, padding: '14px', cursor: 'grab', transition: 'all 0.15s', position: 'relative', animation: 'fadeIn 0.2s ease' }}
+        draggable
+        onDragStart={() => setDraggedItem(item)}
+        onDragEnd={() => { setDraggedItem(null); setDragOverFolder(null) }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 10 }}>
           <FileIcon source={item.source} title={item.title} size={28}/>
           <button className="three-dots-btn" onClick={e => { e.stopPropagation(); setActiveMenuId(isMenuOpen ? null : item.id) }}
@@ -487,7 +490,10 @@ export default function LexVault() {
                   <div style={{ display:'grid', gridTemplateColumns:`repeat(auto-fill, minmax(${isMobile?140:160}px, 1fr))`, gap:8 }}>
                     {filteredFolders.map(f => (
                       <div key={f.id} className="folder-item" onClick={() => navigateToFolder(f)}
-                        style={{ background:surface, border:`1px solid ${border}`, borderRadius:10, padding:'16px', cursor:'pointer', transition:'all 0.15s', position:'relative' }}>
+                        style={{ background: dragOverFolder === f.id ? 'rgba(199,165,106,0.12)' : surface, border:`1px solid ${dragOverFolder === f.id ? 'rgba(199,165,106,0.5)' : border}`, borderRadius:10, padding:'16px', cursor:'pointer', transition:'all 0.15s', position:'relative' }}
+                      onDragOver={e => { e.preventDefault(); setDragOverFolder(f.id) }}
+                      onDragLeave={() => setDragOverFolder(null)}
+                      onDrop={e => { e.preventDefault(); if (draggedItem) moveItemToFolder(draggedItem.id, f.id) }}>
                         {renaming?.id===f.id ? (
                           <input value={renaming.value} onChange={e => setRenaming({...renaming, value:e.target.value})} autoFocus onClick={e => e.stopPropagation()}
                             onKeyDown={e => { if(e.key==='Enter') renameItem(); if(e.key==='Escape') setRenaming(null) }}
