@@ -275,10 +275,10 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Modes */}
+          {/* AI Modes */}
           <div style={{ padding: '6px 10px' }}>
-            <div style={{ fontSize: 10, color: td, letterSpacing: '1px', textTransform: 'uppercase', padding: '4px 2px 6px', fontWeight: 600 }}>Modules</div>
-            {MODES.map(m => (
+            <div style={{ fontSize: 10, color: td, letterSpacing: '1px', textTransform: 'uppercase', padding: '4px 2px 6px', fontWeight: 600 }}>AI Modes</div>
+            {MODES.filter(m => m.id !== 'lexsearch' && m.id !== 'lexdraft').map(m => (
               <button key={m.id} className="mode-btn" onClick={() => switchMode(m)}
                 style={{ width: '100%', padding: '9px 10px', background: mode.id === m.id ? 'rgba(255,255,255,0.08)' : 'transparent', border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 10, marginBottom: 2, transition: 'background 0.15s' }}>
                 <span style={{ color: mode.id === m.id ? m.color : td, flexShrink: 0 }}>{m.icon}</span>
@@ -288,15 +288,27 @@ export default function Home() {
                 {mode.id === m.id && <div style={{ width: 6, height: 6, borderRadius: '50%', background: m.color, flexShrink: 0 }}/>}
               </button>
             ))}
-            <div style={{ height: 1, background: border, margin: '8px 0' }}/>
-            <button className="mode-btn" onClick={() => window.location.href = '/vault'} style={{ width: '100%', padding: '9px 10px', background: 'transparent', border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 10, marginBottom: 2 }}>
-              <span style={{ color: td }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
-              <span style={{ fontSize: 13, color: tm }}>LexVault</span>
-            </button>
-            <button className="mode-btn" onClick={() => window.location.href = '/scan'} style={{ width: '100%', padding: '9px 10px', background: 'transparent', border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ color: td }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M3 7V4h3"/><path d="M21 7V4h-3"/><path d="M3 17v3h3"/><path d="M21 17v3h-3"/><line x1="3" y1="12" x2="21" y2="12"/></svg></span>
-              <span style={{ fontSize: 13, color: tm }}>LexScan</span>
-            </button>
+          </div>
+
+          {/* Tools */}
+          <div style={{ padding: '0 10px 6px' }}>
+            <div style={{ height: 1, background: border, margin: '4px 0 8px' }}/>
+            <div style={{ fontSize: 10, color: td, letterSpacing: '1px', textTransform: 'uppercase', padding: '0 2px 6px', fontWeight: 600 }}>Tools</div>
+            {[
+              { label: 'LexSearch', desc: 'Search court judgments', path: '/research', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="10" cy="10" r="7"/><line x1="15.5" y1="15.5" x2="21" y2="21"/></svg>, color: '#6366f1' },
+              { label: 'LexDraft', desc: 'Draft legal documents', path: '/drafts', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>, color: '#ec4899' },
+              { label: 'LexScan', desc: 'Analyze documents', path: '/scan', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M3 7V4h3"/><path d="M21 7V4h-3"/><path d="M3 17v3h3"/><path d="M21 17v3h-3"/><line x1="3" y1="12" x2="21" y2="12"/></svg>, color: '#f59e0b' },
+              { label: 'LexVault', desc: 'File manager', path: '/vault', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, color: '#C7A56A' },
+            ].map(t => (
+              <button key={t.label} className="mode-btn" onClick={() => window.location.href = t.path}
+                style={{ width: '100%', padding: '8px 10px', background: 'transparent', border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 10, marginBottom: 2, transition: 'background 0.15s' }}>
+                <span style={{ color: t.color, flexShrink: 0 }}>{t.icon}</span>
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{ fontSize: 13, color: tm }}>{t.label}</div>
+                  <div style={{ fontSize: 10, color: td }}>{t.desc}</div>
+                </div>
+              </button>
+            ))}
           </div>
 
           {/* Sessions */}
