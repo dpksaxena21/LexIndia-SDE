@@ -171,7 +171,10 @@ const MODULE_PATHS: Record<string, string> = {
   LexDraft: '/drafts',
   LexScan: '/scan',
   LexVault: '/vault',
-  LexPlain: '/plain',
+  LexPlain: '/assistant',
+  LexConstitute: '/assistant',
+  LexGlobe: '/assistant',
+  LexDebate: '/assistant',
 }
 
 const MODULE_GROUPS = [
@@ -192,7 +195,7 @@ const MODULE_GROUPS = [
       { name: 'LexDraft', desc: '56 document types', live: true },
       { name: 'LexScan',  desc: 'Document analysis', live: true },
       { name: 'LexVault', desc: 'File storage', live: true },
-      { name: 'LexDebate',desc: 'Counter arguments', live: false },
+      { name: 'LexDebate', desc: 'Counter arguments', live: true },
     ]
   },
   {
@@ -200,8 +203,8 @@ const MODULE_GROUPS = [
     color: '#10b981',
     modules: [
       { name: 'LexChat',      desc: 'AI legal advisor', live: true },
-      { name: 'LexConstitute',desc: 'Constitutional law', live: false },
-      { name: 'LexGlobe',    desc: 'International law', live: false },
+      { name: 'LexConstitute', desc: 'Constitutional law', live: true },
+      { name: 'LexGlobe', desc: 'International law', live: true },
       { name: 'LexVoice',    desc: 'Regional languages', live: false },
     ]
   },
