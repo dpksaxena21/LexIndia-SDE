@@ -140,6 +140,7 @@ export default function LexVault() {
   const [showNewFolder, setShowNewFolder] = useState(false)
   const [preview, setPreview] = useState<{ item: VaultItem; url?: string } | null>(null)
   const [analysis, setAnalysis] = useState<{ text: string; loading: boolean } | null>(null)
+  const [scanning, setScanning] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
   const [dragging, setDragging] = useState(false)
   const [width, setWidth] = useState(1200)
@@ -257,6 +258,30 @@ export default function LexVault() {
       const data = await res.json()
       setAnalysis({ text: data.analysis, loading: false })
     } catch { setAnalysis({ text: 'Analysis failed. Please try again.', loading: false }) }
+  }
+
+  const scanItem = async (item: VaultItem) => {
+    if (!token || !preview?.url) return
+    setScanning(true)
+    setAnalysis({ text: '', loading: true })
+    try {
+      const fileRes = await fetch(preview.url)
+      const blob = await fileRes.blob()
+      const file = new File([blob], item.title, { type: blob.type })
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('question', '')
+      const res = await fetch(`${API}/api/scan`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: fd,
+      })
+      const data = await res.json()
+      setAnalysis({ text: data.analysis, loading: false })
+    } catch {
+      setAnalysis({ text: 'Scan failed. Please try again.', loading: false })
+    }
+    setScanning(false)
   }
 
   const bg = '#080809'; const sidebarBg = '#060608'
@@ -562,6 +587,12 @@ export default function LexVault() {
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={gold} strokeWidth="1.5" strokeLinecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                   AI Analyze
                 </button>
+                {preview.item.source === 'file' && preview.url && (
+                  <button onClick={() => scanItem(preview.item)} disabled={scanning} style={{ padding:'7px 14px', background:'rgba(99,102,241,0.12)', border:'1px solid rgba(99,102,241,0.3)', borderRadius:8, color:'#6366f1', fontSize:12, cursor:'pointer', fontFamily:'inherit', display:'flex', alignItems:'center', gap:6 }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="1.5" strokeLinecap="round"><path d="M3 7V4h3"/><path d="M21 7V4h-3"/><path d="M3 17v3h3"/><path d="M21 17v3h-3"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+                    {scanning ? 'Scanning...' : 'Deep Scan'}
+                  </button>
+                )}
                 {preview.url && (
                   <a href={preview.url} target="_blank" rel="noopener noreferrer" style={{ padding:'7px 12px', background:surface, border:`1px solid ${border}`, borderRadius:8, color:tm, fontSize:12, textDecoration:'none', display:'flex', alignItems:'center', gap:6 }}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
