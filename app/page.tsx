@@ -400,7 +400,7 @@ export default function Home() {
                   {mode.suggestions.map((s, i) => (
                     <button key={i} className="suggestion-btn" onClick={() => send(s.text)}
                       style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${border}`, borderRadius: 12, padding: '14px', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', transition: 'all 0.2s', animation: `fadeUp 0.5s ease ${0.2 + i * 0.07}s both`, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      <span style={{ fontSize: 28, lineHeight: '1', display: 'block', marginBottom: 4 }}>{s.emoji}</span>
+                      
                       <div style={{ fontSize: 12, color: tm, lineHeight: 1.5 }}>{s.text}</div>
                     </button>
                   ))}
