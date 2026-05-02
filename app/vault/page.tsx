@@ -135,7 +135,7 @@ export default function LexVault() {
   }, [])
 
   const currentFolders = folders.filter(f => f.parent_id === currentFolder)
-  const currentItems = items.filter(i => i.folder_id === currentFolder)
+  const currentItems = items.filter(i => (i.folder_id ?? null) === currentFolder)
 
   const filteredFolders = currentFolders.filter(f => f.name.toLowerCase().includes(search.toLowerCase()))
   const filteredItems = currentItems
