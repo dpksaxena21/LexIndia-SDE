@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { AuthProvider } from './auth/AuthContext'
+import MobileNav from './components/BottomNav'
 
 export const metadata: Metadata = {
   title: 'LexIndia — AI Legal Research for Indian Advocates',
@@ -47,8 +48,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AuthProvider>{children}</AuthProvider>
-      </body>
+  <AuthProvider>
+    {children}
+    <MobileNav />
+  </AuthProvider>
+</body>
     </html>
   )
 }
