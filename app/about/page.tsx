@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { useAuth } from './auth/AuthContext'
-import UserMenu from './components/UserMenu'
+import { useAuth } from '../auth/AuthContext'
+import UserMenu from '../components/UserMenu'
 
 function LogoMark({ size = 32, color = '#ffffff' }: { size?: number; color?: string }) {
   return (
