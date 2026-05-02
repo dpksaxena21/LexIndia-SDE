@@ -141,8 +141,8 @@ export default function LexVault() {
   const [preview, setPreview] = useState<{ item: VaultItem; url?: string } | null>(null)
   const [analysis, setAnalysis] = useState<{ text: string; loading: boolean } | null>(null)
   const [scanning, setScanning] = useState(false)
-  const [draggedItem, setDraggedItem] = useState(null)
-  const [dragOverFolder, setDragOverFolder] = useState(null)
+  const [draggedItem, setDraggedItem] = useState<VaultItem | null>(null)
+  const [dragOverFolder, setDragOverFolder] = useState<string | null>(null)
   const [fullscreen, setFullscreen] = useState(false)
   const [dragging, setDragging] = useState(false)
   const [width, setWidth] = useState(1200)
@@ -283,7 +283,7 @@ export default function LexVault() {
     setScanning(false)
   }
 
-  const moveItemToFolder = async (itemId, folderId) => {
+  const moveItemToFolder = async (itemId: string, folderId: string | null) => {
     if (!token) return
     await fetch(`${API}/api/vault/${itemId}/move`, {
       method: 'PATCH',
