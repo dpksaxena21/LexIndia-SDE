@@ -185,7 +185,7 @@ export default function LexScanPage() {
       <nav style={{ borderBottom: `1px solid ${border}`, padding: '0 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56, position: 'sticky', top: 0, background: bg, zIndex: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <BackButton />
-          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+          <Link href="/about" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
           <LogoMark size={22} />
           <span style={{ color: '#F4F1EA', fontWeight: 700, fontSize: 16, letterSpacing: '-0.3px' }}>LexIndia</span>
         </Link>
