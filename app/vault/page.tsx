@@ -30,8 +30,11 @@ type Folder = { id: string; name: string; parent_id: string | null; created_at: 
 type ContextMenu = { x: number; y: number; item?: VaultItem; folder?: Folder } | null
 
 function BackButton() {
-  if (typeof window === 'undefined') return null
-  if (window.history.length <= 1) return null
+  const [canGoBack, setCanGoBack] = React.useState(false)
+  React.useEffect(() => {
+    setCanGoBack(window.history.length > 1)
+  }, [])
+  if (!canGoBack) return null
   return (
     <button
       onClick={() => window.history.back()}
