@@ -389,7 +389,7 @@ export default function LexAssistant() {
             <a href="/track" style={{ fontSize: 12, color: td, textDecoration: 'none' }}>Track</a>
             <a href="/scan" style={{ fontSize: 12, color: td, textDecoration: 'none' }}>Scan</a>
             <a href="/vault" style={{ fontSize: 12, color: td, textDecoration: 'none' }}>Vault</a>
-            <a href="/about" style={{ fontSize: 12, color: gold, textDecoration: 'none', fontWeight: 600 }}>About</a>
+            <a href="/about" style={{ fontSize: 12, color: '#C7A56A', textDecoration: 'none', fontWeight: 600 }}>About</a>
           </div>
         </nav>
 
