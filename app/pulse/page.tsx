@@ -86,14 +86,23 @@ function BackButton() {
     <button
       onClick={() => window.history.back()}
       style={{
+        position: 'fixed', top: 14, left: 14, zIndex: 999,
         display: 'flex', alignItems: 'center', gap: 4,
-        background: 'none', border: 'none', cursor: 'pointer',
-        color: 'rgba(255,255,255,0.4)', fontSize: 12, padding: '4px 8px',
-        borderRadius: 6, transition: 'color 0.15s', fontFamily: 'inherit',
-        flexShrink: 0,
+        background: 'rgba(8,8,9,0.85)', backdropFilter: 'blur(8px)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: 8, padding: '6px 12px',
+        cursor: 'pointer', color: 'rgba(255,255,255,0.6)',
+        fontSize: 12, fontFamily: 'inherit',
+        transition: 'all 0.15s',
       }}
-      onMouseEnter={e => (e.currentTarget.style.color = '#ffffff')}
-      onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
+      onMouseEnter={e => {
+        e.currentTarget.style.color = '#ffffff'
+        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.color = 'rgba(255,255,255,0.6)'
+        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'
+      }}
     >
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="15 18 9 12 15 6"/>
