@@ -79,6 +79,30 @@ function estimateReadTime(text: string) {
   return Math.max(1, Math.ceil(words / 200))
 }
 
+function BackButton() {
+  if (typeof window === 'undefined') return null
+  if (window.history.length <= 1) return null
+  return (
+    <button
+      onClick={() => window.history.back()}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 4,
+        background: 'none', border: 'none', cursor: 'pointer',
+        color: 'rgba(255,255,255,0.4)', fontSize: 12, padding: '4px 8px',
+        borderRadius: 6, transition: 'color 0.15s', fontFamily: 'inherit',
+        flexShrink: 0,
+      }}
+      onMouseEnter={e => (e.currentTarget.style.color = '#ffffff')}
+      onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Back
+    </button>
+  )
+}
+
 function SkeletonCard({ featured = false }) {
   return (
     <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: featured ? '28px' : '20px', animation: 'shimmer 1.5s ease-in-out infinite' }}>
@@ -239,6 +263,7 @@ export default function LexPulse() {
       {/* NAV */}
       <nav style={{ borderBottom:`1px solid ${border}`, padding:'0 24px', height:56, display:'flex', alignItems:'center', justifyContent:'space-between', background:'rgba(8,8,9,0.95)', backdropFilter:'blur(12px)', position:'sticky', top:0, zIndex:10 }}>
         <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+          <BackButton />
           <button onClick={() => window.location.href='/'} style={{ display:'flex', alignItems:'center', gap:8, background:'none', border:'none', cursor:'pointer' }}>
             <LogoMark size={20} color={tp}/>
             <span style={{ fontSize:14, fontWeight:700, color:tp }}>LexIndia</span>

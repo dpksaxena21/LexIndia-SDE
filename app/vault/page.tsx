@@ -29,6 +29,30 @@ type VaultItem = {
 type Folder = { id: string; name: string; parent_id: string | null; created_at: string }
 type ContextMenu = { x: number; y: number; item?: VaultItem; folder?: Folder } | null
 
+function BackButton() {
+  if (typeof window === 'undefined') return null
+  if (window.history.length <= 1) return null
+  return (
+    <button
+      onClick={() => window.history.back()}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 4,
+        background: 'none', border: 'none', cursor: 'pointer',
+        color: 'rgba(255,255,255,0.4)', fontSize: 12, padding: '4px 8px',
+        borderRadius: 6, transition: 'color 0.15s', fontFamily: 'inherit',
+        flexShrink: 0,
+      }}
+      onMouseEnter={e => (e.currentTarget.style.color = '#ffffff')}
+      onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Back
+    </button>
+  )
+}
+
 function FileIcon({ source, title, size = 28 }: { source: string; title: string; size?: number }) {
   const s = size
   if (source === 'file') {
@@ -396,6 +420,7 @@ export default function LexVault() {
       {/* TOP BAR */}
       <div style={{ borderBottom:`1px solid ${border}`, padding:'0 20px', height:56, display:'flex', alignItems:'center', justifyContent:'space-between', background:'rgba(6,6,8,0.95)', backdropFilter:'blur(12px)', flexShrink:0, zIndex:20 }}>
         <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+          <BackButton />
           <button onClick={() => window.location.href='/'} style={{ display:'flex', alignItems:'center', gap:8, background:'none', border:'none', cursor:'pointer' }}>
             <LogoMark size={20} color={tp}/><span style={{ fontSize:14, fontWeight:700, color:tp }}>LexIndia</span>
           </button>

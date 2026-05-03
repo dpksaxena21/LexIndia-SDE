@@ -108,6 +108,30 @@ const MODES: Mode[] = [
   },
 ]
 
+function BackButton() {
+  if (typeof window === 'undefined') return null
+  if (window.history.length <= 1) return null
+  return (
+    <button
+      onClick={() => window.history.back()}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 4,
+        background: 'none', border: 'none', cursor: 'pointer',
+        color: 'rgba(255,255,255,0.4)', fontSize: 12, padding: '4px 8px',
+        borderRadius: 6, transition: 'color 0.15s', fontFamily: 'inherit',
+        flexShrink: 0,
+      }}
+      onMouseEnter={e => (e.currentTarget.style.color = '#ffffff')}
+      onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Back
+    </button>
+  )
+}
+
 function renderMarkdown(text: string) {
   const c1 = '#ffffff'; const c2 = 'rgba(255,255,255,0.82)'
   const c3 = 'rgba(255,255,255,0.08)'; const c4 = 'rgba(255,255,255,0.5)'
@@ -359,6 +383,7 @@ export default function LexAssistant() {
         {/* TOP NAV */}
         <nav style={{ borderBottom: `1px solid ${border}`, padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(8,8,9,0.92)', backdropFilter: 'blur(12px)', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <BackButton />
             {isMobile && (
               <button onClick={() => setSidebarOpen(true)} style={{ background: 'none', border: 'none', color: td, cursor: 'pointer', padding: '4px' }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>

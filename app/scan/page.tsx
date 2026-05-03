@@ -39,6 +39,30 @@ function MarkdownBlock({ text }: { text: string }) {
   )
 }
 
+function BackButton() {
+  if (typeof window === 'undefined') return null
+  if (window.history.length <= 1) return null
+  return (
+    <button
+      onClick={() => window.history.back()}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 4,
+        background: 'none', border: 'none', cursor: 'pointer',
+        color: 'rgba(255,255,255,0.4)', fontSize: 12, padding: '4px 8px',
+        borderRadius: 6, transition: 'color 0.15s', fontFamily: 'inherit',
+        flexShrink: 0,
+      }}
+      onMouseEnter={e => (e.currentTarget.style.color = '#ffffff')}
+      onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Back
+    </button>
+  )
+}
+
 export default function LexScanPage() {
   const { user, token } = useAuth()
   const [dark] = useState(true)
@@ -150,10 +174,13 @@ export default function LexScanPage() {
 
       {/* Nav */}
       <nav style={{ borderBottom: `1px solid ${border}`, padding: '0 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56, position: 'sticky', top: 0, background: bg, zIndex: 10 }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <BackButton />
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
           <LogoMark size={22} />
           <span style={{ color: '#F4F1EA', fontWeight: 700, fontSize: 16, letterSpacing: '-0.3px' }}>LexIndia</span>
         </Link>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Link href="/research" style={{ color: td, fontSize: 13, textDecoration: 'none', padding: '4px 10px' }}>Search</Link>
           <Link href="/assistant" style={{ color: td, fontSize: 13, textDecoration: 'none', padding: '4px 10px' }}>Chat</Link>

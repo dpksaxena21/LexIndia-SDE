@@ -20,6 +20,30 @@ function LogoMark({ size = 32, color = '#ffffff' }: { size?: number; color?: str
   )
 }
 
+function BackButton() {
+  if (typeof window === 'undefined') return null
+  if (window.history.length <= 1) return null
+  return (
+    <button
+      onClick={() => window.history.back()}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 4,
+        background: 'none', border: 'none', cursor: 'pointer',
+        color: 'rgba(255,255,255,0.4)', fontSize: 12, padding: '4px 8px',
+        borderRadius: 6, transition: 'color 0.15s', fontFamily: 'inherit',
+        flexShrink: 0,
+      }}
+      onMouseEnter={e => (e.currentTarget.style.color = '#ffffff')}
+      onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Back
+    </button>
+  )
+}
+
 function LoadingState() {
   const [status, setStatus] = useState(0)
   const statuses = ['Searching Indian Kanoon', 'Fetching case law', 'Reading judgments', 'Generating AI analysis', 'Almost ready']
@@ -239,13 +263,16 @@ export default function Research() {
       `}</style>
 
       <nav style={{ borderBottom:`1px solid ${border}`, padding:'12px 32px', display:'flex', alignItems:'center', justifyContent:'space-between', position:'sticky', top:0, zIndex:10, background:navBg, backdropFilter:'blur(12px)', transition:'background 0.3s,border-color 0.3s' }}>
-        <button onClick={() => window.location.href = '/'} style={{ display:'flex', alignItems:'center', gap:10, background:'none', border:'none', cursor:'pointer', flexShrink:0 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:4 }}>
+          <BackButton />
+          <button onClick={() => window.location.href = '/'} style={{ display:'flex', alignItems:'center', gap:10, background:'none', border:'none', cursor:'pointer', flexShrink:0 }}>
           <LogoMark size={28} color={logoColor}/>
           <div style={{ display:'flex', alignItems:'baseline', gap:4 }}>
             <span style={{ fontSize:14, fontWeight:800, color:tp, letterSpacing:3 }}>LEX</span>
             <span style={{ fontSize:14, fontWeight:200, color:tp, letterSpacing:3 }}>INDIA</span>
           </div>
         </button>
+        </div>
         <div style={{ display:'flex', gap:24, fontSize:13, alignItems:'center' }}>
           <span style={{ color:tp, fontWeight:600, cursor:'pointer' }} onClick={() => window.location.href='/research'}>Research</span>
           <span style={{ color:td, cursor:'pointer' }} onClick={() => window.location.href='/assistant'}>Assistant</span>
