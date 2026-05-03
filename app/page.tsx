@@ -405,7 +405,7 @@ export default function Home() {
                   <LogoMark size={28} color="#C7A56A"/>
                 </div>
                 <h1 style={{ fontSize: isMobile ? 22 : 28, fontWeight: 800, color: tp, letterSpacing: -0.5, marginBottom: 6, textAlign: 'center', animation: 'fadeUp 0.5s ease both' }}>
-                  {mode.id === 'lexchat' ? (new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening') + (user ? ', ' + user.name.split(' ')[0] : '') : mode.name}
+                  {mode.id === 'lexchat' ? `Good evening${user ? ', ' + user.name.split(' ')[0] : ''}` : mode.name}
                 </h1>
                 <p style={{ fontSize: 14, color: tm, marginBottom: 8, textAlign: 'center', animation: 'fadeUp 0.5s ease 0.1s both' }}>{mode.tagline}</p>
                 <p style={{ fontSize: 12, color: td, marginBottom: 36, textAlign: 'center', animation: 'fadeUp 0.5s ease 0.15s both' }}></p>
