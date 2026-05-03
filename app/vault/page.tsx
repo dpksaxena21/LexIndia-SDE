@@ -184,6 +184,22 @@ export default function LexVault() {
   const [breadcrumb, setBreadcrumb] = useState<{ id: string | null; name: string }[]>([{ id: null, name: 'My Vault' }])
   const [view, setView] = useState<'grid' | 'list'>('grid')
   const [search, setSearch] = useState('')
+  const [searchResults, setSearchResults] = useState<VaultItem[] | null>(null)
+  const [searching, setSearching] = useState(false)
+
+  const doSearch = async (q: string) => {
+    if (!q.trim() || q.trim().length < 2) { setSearchResults(null); return }
+    if (!token) return
+    setSearching(true)
+    try {
+      const res = await fetch(`${API}/api/vault/search?q=${encodeURIComponent(q)}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      const data = await res.json()
+      setSearchResults(data.results || [])
+    } catch { setSearchResults([]) }
+    setSearching(false)
+  }
   const [sortBy, setSortBy] = useState<'date' | 'name' | 'type'>('date')
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
@@ -445,7 +461,10 @@ export default function LexVault() {
 
         <div style={{ flex:1, maxWidth:400, margin:'0 24px', position:'relative' }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={td} strokeWidth="2" strokeLinecap="round" style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)' }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search files and folders..." style={{ width:'100%', background:surface, border:`1px solid ${border}`, borderRadius:8, padding:'8px 12px 8px 36px', fontSize:13, color:tp, outline:'none', boxSizing:'border-box' }} onFocus={e => e.target.style.borderColor=borderHi} onBlur={e => e.target.style.borderColor=border}/>
+          <input value={search} onChange={e => { setSearch(e.target.value); if (!e.target.value) setSearchResults(null) }} onKeyDown={e => e.key === 'Enter' && doSearch(search)} placeholder="Search files and folders..." style={{ width:'100%', background:surface, border:`1px solid ${border}`, borderRadius:8, padding:'8px 12px 8px 36px', fontSize:13, color:tp, outline:'none', boxSizing:'border-box' }} onFocus={e => e.target.style.borderColor=borderHi} onBlur={e => e.target.style.borderColor=border}/>
+          <button onClick={() => doSearch(search)} disabled={searching || !search.trim()} style={{ position:'absolute', right:8, top:'50%', transform:'translateY(-50%)', background: search.trim() ? gold : 'transparent', border:'none', borderRadius:6, padding:'4px 10px', fontSize:11, color: search.trim() ? '#000' : td, cursor: search.trim() ? 'pointer' : 'default', fontWeight:600, fontFamily:'inherit' }}>
+            {searching ? '...' : 'Search'}
+          </button>
         </div>
 
         <div style={{ display:'flex', alignItems:'center', gap:8 }}>
@@ -525,6 +544,21 @@ export default function LexVault() {
             </div>
           )}
 
+          {searchResults !== null && (
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontSize: 11, color: td, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: 12, fontWeight: 600 }}>
+                {searchResults.length} result{searchResults.length !== 1 ? 's' : ''} for "{search}"
+                <button onClick={() => { setSearchResults(null); setSearch('') }} style={{ marginLeft: 12, background: 'transparent', border: 'none', color: td, cursor: 'pointer', fontSize: 11, fontFamily: 'inherit', textDecoration: 'underline' }}>Clear</button>
+              </div>
+              {searchResults.length === 0 ? (
+                <div style={{ color: td, fontSize: 13 }}>No results found.</div>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fill, minmax(${isMobile ? 140 : 160}px, 1fr))`, gap: 8 }}>
+                  {searchResults.map((item: any) => <ItemCard key={item.id} item={item}/>)}
+                </div>
+              )}
+            </div>
+          )}
           {loading ? (
             <div style={{ display:'flex', justifyContent:'center', padding:'60px 0', color:td }}>Loading...</div>
           ) : filteredFolders.length===0 && filteredItems.length===0 ? (
