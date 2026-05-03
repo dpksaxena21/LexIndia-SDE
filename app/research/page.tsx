@@ -285,13 +285,13 @@ export default function Research() {
           </div>
         </button>
         </div>
-        <div style={{ display:'flex', gap:24, fontSize:13, alignItems:'center' }}>
-          <a href="/assistant" style={{ color: td, textDecoration: 'none', fontSize: 13 }}>Chat</a>
-          <a href="/research" style={{ color: tp, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>Search</a>
-          <a href="/track" style={{ color: td, textDecoration: 'none', fontSize: 13 }}>Track</a>
-          <a href="/drafts" style={{ color: td, textDecoration: 'none', fontSize: 13 }}>Draft</a>
-          <a href="/pulse" style={{ color: td, textDecoration: 'none', fontSize: 13 }}>News</a>
-          <a href="/vault" style={{ color: td, textDecoration: 'none', fontSize: 13 }}>Vault</a>
+        <div style={{ display:'flex', gap:12, fontSize:12, alignItems:'center' }}>
+          <a href="/assistant" style={{ color: td, textDecoration: 'none' }}>Chat</a>
+          <a href="/research" style={{ color: tp, textDecoration: 'none', fontWeight: 600 }}>Search</a>
+          <a href="/track" style={{ color: td, textDecoration: 'none' }}>Track</a>
+          <a href="/drafts" style={{ color: td, textDecoration: 'none' }}>Draft</a>
+          <a href="/pulse" style={{ color: td, textDecoration: 'none' }}>News</a>
+          <a href="/vault" style={{ color: td, textDecoration: 'none' }}>Vault</a>
           <button onClick={() => setDark(d => !d)} style={{ background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)', border:`1px solid ${border}`, borderRadius:20, padding:'5px 12px', cursor:'pointer', fontSize:11, color:td, fontFamily:'inherit', transition:'all 0.3s', letterSpacing:1 }}>
             {dark ? '○ Light' : '● Dark'}
           </button>
