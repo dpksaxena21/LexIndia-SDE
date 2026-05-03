@@ -375,7 +375,7 @@ export default function Home() {
           )}
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <a href="/about" style={{ fontSize: 12, color: td, textDecoration: 'none' }}>About</a>
+            <a href="/about" style={{ fontSize: 12, color: '#C7A56A', textDecoration: 'none', fontWeight: 600 }}>About</a>
             {!isMobile && user && <UserMenu/>}
             {!isMobile && !user && (
               <button onClick={() => window.location.href = '/login'} style={{ padding: '6px 16px', background: '#C7A56A', color: '#000', border: 'none', borderRadius: 16, fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Sign In</button>
