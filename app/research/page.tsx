@@ -27,7 +27,7 @@ function BackButton() {
     <button
       onClick={() => window.history.back()}
       style={{
-        position: 'fixed', top: 14, left: 14, zIndex: 999,
+        position: 'fixed', top: 12, right: 16, left: 'auto', zIndex: 999,
         display: 'flex', alignItems: 'center', gap: 4,
         background: 'rgba(8,8,9,0.85)', backdropFilter: 'blur(8px)',
         border: '1px solid rgba(255,255,255,0.1)',
