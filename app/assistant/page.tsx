@@ -341,7 +341,7 @@ export default function LexAssistant() {
         <div style={{ width: isMobile ? '100%' : 240, flexShrink: 0, background: sidebarBg, borderRight: `1px solid ${border}`, display: 'flex', flexDirection: 'column', position: isMobile ? 'fixed' : 'relative', inset: isMobile ? 0 : 'auto', zIndex: isMobile ? 50 : 1 }}>
           {/* Sidebar header */}
           <div style={{ padding: '14px 12px', borderBottom: `1px solid ${border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <button onClick={() => window.location.href = '/'} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer' }}>
+            <button onClick={() => window.location.href = '/about'} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer' }}>
               <LogoMark size={18} color={tp}/>
               <span style={{ fontSize: 13, fontWeight: 700, color: tp }}>LexIndia</span>
             </button>

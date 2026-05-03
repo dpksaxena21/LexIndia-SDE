@@ -273,7 +273,7 @@ export default function LexPulse() {
       <nav style={{ borderBottom:`1px solid ${border}`, padding:'0 24px', height:56, display:'flex', alignItems:'center', justifyContent:'space-between', background:'rgba(8,8,9,0.95)', backdropFilter:'blur(12px)', position:'sticky', top:0, zIndex:10 }}>
         <div style={{ display:'flex', alignItems:'center', gap:12 }}>
           <BackButton />
-          <button onClick={() => window.location.href='/'} style={{ display:'flex', alignItems:'center', gap:8, background:'none', border:'none', cursor:'pointer' }}>
+          <button onClick={() => window.location.href='/about'} style={{ display:'flex', alignItems:'center', gap:8, background:'none', border:'none', cursor:'pointer' }}>
             <LogoMark size={20} color={tp}/>
             <span style={{ fontSize:14, fontWeight:700, color:tp }}>LexIndia</span>
           </button>

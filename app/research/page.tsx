@@ -274,7 +274,7 @@ export default function Research() {
       <nav style={{ borderBottom:`1px solid ${border}`, padding:'12px 32px', display:'flex', alignItems:'center', justifyContent:'space-between', position:'sticky', top:0, zIndex:10, background:navBg, backdropFilter:'blur(12px)', transition:'background 0.3s,border-color 0.3s' }}>
         <div style={{ display:'flex', alignItems:'center', gap:4 }}>
           <BackButton />
-          <button onClick={() => window.location.href = '/'} style={{ display:'flex', alignItems:'center', gap:10, background:'none', border:'none', cursor:'pointer', flexShrink:0 }}>
+          <button onClick={() => window.location.href = '/about'} style={{ display:'flex', alignItems:'center', gap:10, background:'none', border:'none', cursor:'pointer', flexShrink:0 }}>
           <LogoMark size={28} color={logoColor}/>
           <div style={{ display:'flex', alignItems:'baseline', gap:4 }}>
             <span style={{ fontSize:14, fontWeight:800, color:tp, letterSpacing:3 }}>LEX</span>
