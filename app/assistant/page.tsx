@@ -321,6 +321,29 @@ export default function LexAssistant() {
               New Chat
             </button>
           </div>
+          <div style={{ padding: '0 8px 8px' }}>
+            <div style={{ fontSize: 10, color: td, letterSpacing: '1px', textTransform: 'uppercase', padding: '6px 4px 4px', fontWeight: 600 }}>Tools</div>
+            {[
+              { name: 'LexSearch', path: '/research', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="10" cy="10" r="7"/><line x1="15.5" y1="15.5" x2="21" y2="21"/></svg> },
+              { name: 'LexTrack', path: '/track', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg> },
+              { name: 'LexDraft', path: '/drafts', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> },
+              { name: 'LexScan', path: '/scan', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M3 7V4h3"/><path d="M21 7V4h-3"/><path d="M3 17v3h3"/><path d="M21 17v3h-3"/><line x1="3" y1="12" x2="21" y2="12"/></svg> },
+              { name: 'LexPulse', path: '/pulse', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><polyline points="2 12 6 12 8 5 11 19 14 9 16 15 18 12 22 12"/></svg> },
+              { name: 'LexVault', path: '/vault', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> },
+            ].map(tool => (
+              <button key={tool.name} onClick={() => window.location.href = tool.path} className="mode-tab"
+                style={{ width: '100%', padding: '7px 10px', background: 'transparent', border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2, transition: 'all 0.15s' }}>
+                <span style={{ color: td }}>{tool.icon}</span>
+                <span style={{ fontSize: 12, color: tm }}>{tool.name}</span>
+              </button>
+            ))}
+            <div style={{ height: 1, background: border, margin: '6px 4px' }}/>
+            <button onClick={() => window.location.href = '/about'} className="mode-tab"
+              style={{ width: '100%', padding: '7px 10px', background: 'transparent', border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 8, transition: 'all 0.15s' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C7A56A" strokeWidth="1.5" strokeLinecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span style={{ fontSize: 12, color: '#C7A56A', fontWeight: 600 }}>About LexIndia</span>
+            </button>
+          </div>
 
           {/* Mode selector in sidebar */}
           <div style={{ padding: '0 8px 8px' }}>
