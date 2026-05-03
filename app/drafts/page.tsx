@@ -259,9 +259,12 @@ export default function Drafts() {
         </button>
         </div>
         <div style={{ display: 'flex', gap: 24, fontSize: 13, alignItems: 'center' }}>
-          <span style={{ color: td, cursor: 'pointer' }} onClick={() => window.location.href = '/research'}>Research</span>
-          <span style={{ color: td, cursor: 'pointer' }} onClick={() => window.location.href = '/assistant'}>Assistant</span>
-          <span style={{ color: tp, fontWeight: 600 }}>Drafts</span>
+          <a href="/assistant" style={{ color: td, textDecoration: 'none', fontSize: 13 }}>Chat</a>
+          <a href="/research" style={{ color: td, textDecoration: 'none', fontSize: 13 }}>Search</a>
+          <a href="/track" style={{ color: td, textDecoration: 'none', fontSize: 13 }}>Track</a>
+          <a href="/drafts" style={{ color: tp, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>Draft</a>
+          <a href="/pulse" style={{ color: td, textDecoration: 'none', fontSize: 13 }}>News</a>
+          <a href="/vault" style={{ color: td, textDecoration: 'none', fontSize: 13 }}>Vault</a>
           <button onClick={() => setDark(d => !d)} style={{ background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)', border: `1px solid ${border}`, borderRadius: 20, padding: '5px 12px', cursor: 'pointer', fontSize: 11, color: td, fontFamily: 'inherit', transition: 'all 0.3s', letterSpacing: 1 }}>
             {dark ? '○ Light' : '● Dark'}
           </button>
