@@ -175,6 +175,8 @@ const MODULE_PATHS: Record<string, string> = {
   LexConstitute: '/assistant',
   LexGlobe: '/assistant',
   LexDebate: '/assistant',
+  LexTrack: '/track',
+  LexPulse: '/pulse',
 }
 
 const MODULE_GROUPS = [
