@@ -80,8 +80,8 @@ function estimateReadTime(text: string) {
 }
 
 function BackButton() {
-  const [canGoBack, setCanGoBack] = React.useState(false)
-  React.useEffect(() => {
+  const [canGoBack, setCanGoBack] = useState(false)
+  useEffect(() => {
     setCanGoBack(window.history.length > 1)
   }, [])
   if (!canGoBack) return null

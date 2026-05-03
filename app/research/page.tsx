@@ -21,8 +21,8 @@ function LogoMark({ size = 32, color = '#ffffff' }: { size?: number; color?: str
 }
 
 function BackButton() {
-  const [canGoBack, setCanGoBack] = React.useState(false)
-  React.useEffect(() => {
+  const [canGoBack, setCanGoBack] = useState(false)
+  useEffect(() => {
     setCanGoBack(window.history.length > 1)
   }, [])
   if (!canGoBack) return null
