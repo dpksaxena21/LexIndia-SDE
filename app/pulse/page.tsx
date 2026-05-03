@@ -27,6 +27,7 @@ type Article = {
 }
 
 const CATEGORIES = [
+  { id: 'today', label: 'Today', color: '#3fb950' },
   { id: 'all', label: 'All News', color: '#C7A56A' },
   { id: 'supreme', label: 'Supreme Court', color: '#6366f1' },
   { id: 'highcourt', label: 'High Courts', color: '#10b981' },
@@ -93,7 +94,7 @@ function SkeletonCard({ featured = false }) {
 export default function LexPulse() {
   const { token } = useAuth()
   const [articles, setArticles] = useState<Article[]>([])
-  const [category, setCategory] = useState('all')
+  const [category, setCategory] = useState('today')
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [search, setSearch] = useState('')
@@ -116,7 +117,8 @@ export default function LexPulse() {
     if (isRefresh) setRefreshing(true)
     else setLoading(true)
     try {
-      const res = await fetch(`${API}/api/pulse?category=${cat}`)
+      const endpoint = cat === 'today' ? `${API}/api/pulse/today` : `${API}/api/pulse?category=${cat}`
+      const res = await fetch(endpoint)
       const data = await res.json()
       setArticles(data.articles || [])
       setLastUpdated(new Date())
