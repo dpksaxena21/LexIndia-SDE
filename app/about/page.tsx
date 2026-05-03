@@ -212,7 +212,7 @@ const MODULE_GROUPS = [
     label: 'Court Tools',
     color: '#ec4899',
     modules: [
-      { name: 'LexTrack', desc: 'Live case updates', live: false },
+      { name: 'LexTrack', desc: 'Live case updates', live: true },
       { name: 'LexCause', desc: 'Daily cause list', live: false },
       { name: 'LexBench', desc: 'Judge analysis', live: false },
       { name: 'LexMap',   desc: 'Court locator', live: false },
