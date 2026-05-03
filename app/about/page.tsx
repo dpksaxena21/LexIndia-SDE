@@ -364,7 +364,7 @@ export default function Home() {
 
           {/* MODULE GROUPS */}
           <section style={{ maxWidth:960, margin:'64px auto', padding:'0 24px' }}>
-            <p style={{ textAlign:'center', fontSize:10, letterSpacing:4, color:textDim, textTransform:'uppercase', marginBottom:48, transition:'color 0.3s' }}>16 Modules · 10 Live</p>
+            <p style={{ textAlign:'center', fontSize:10, letterSpacing:4, color:textDim, textTransform:'uppercase', marginBottom:48, transition:'color 0.3s' }}>16 Modules · 11 Live</p>
 
             {MODULE_GROUPS.map((group, gi) => (
               <div key={group.label} style={{ marginBottom:48 }}>
