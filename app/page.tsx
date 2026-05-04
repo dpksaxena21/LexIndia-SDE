@@ -364,7 +364,7 @@ export default function Home() {
           </div>
 
           {/* Desktop mode tabs */}
-          {!isMobile && typeof window !== 'undefined' && window.innerWidth > 1024 && (
+          {!isMobile && winW > 1024 && (
             <div style={{ display: 'flex', gap: 2, background: 'rgba(255,255,255,0.03)', border: `1px solid ${border}`, borderRadius: 10, padding: 3 }}>
               {MODES.map(m => (
                 <button key={m.id} className="mode-btn" onClick={() => switchMode(m)}
