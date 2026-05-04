@@ -81,33 +81,23 @@ function estimateReadTime(text: string) {
 
 function BackButton() {
   const [canGoBack, setCanGoBack] = useState(false)
-  useEffect(() => {
-    setCanGoBack(window.history.length > 1)
-  }, [])
+  useEffect(() => { setCanGoBack(window.history.length > 1) }, [])
   if (!canGoBack) return null
   return (
     <button
       onClick={() => window.history.back()}
       style={{
-        position: 'fixed', top: 12, right: 16, left: 'auto', zIndex: 999,
-        display: 'flex', alignItems: 'center', gap: 4,
-        background: 'rgba(8,8,9,0.85)', backdropFilter: 'blur(8px)',
-        border: '1px solid rgba(255,255,255,0.1)',
-        borderRadius: 8, padding: '6px 12px',
-        cursor: 'pointer', color: 'rgba(255,255,255,0.6)',
+        display: 'flex', alignItems: 'center', gap: 3,
+        background: 'transparent', border: 'none',
+        cursor: 'pointer', color: 'rgba(255,255,255,0.4)',
         fontSize: 12, fontFamily: 'inherit',
-        transition: 'all 0.15s',
+        padding: '4px 6px', borderRadius: 6, flexShrink: 0,
+        transition: 'color 0.15s',
       }}
-      onMouseEnter={e => {
-        e.currentTarget.style.color = '#ffffff'
-        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.color = 'rgba(255,255,255,0.6)'
-        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'
-      }}
+      onMouseEnter={e => (e.currentTarget.style.color = '#ffffff')}
+      onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
     >
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
         <polyline points="15 18 9 12 15 6"/>
       </svg>
       Back
