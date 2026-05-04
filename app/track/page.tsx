@@ -89,18 +89,14 @@ export default function LexTrack() {
         ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
       `}</style>
 
-      {canGoBack && (
-        <button onClick={() => window.history.back()} style={{ position: 'fixed', top: 14, left: 14, zIndex: 999, display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(8,8,9,0.85)', backdropFilter: 'blur(8px)', border: `1px solid ${border}`, borderRadius: 8, padding: '6px 12px', cursor: 'pointer', color: tm, fontSize: 12, fontFamily: 'inherit' }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="15 18 9 12 15 6"/></svg>
-          Back
-        </button>
-      )}
-
       <nav style={{ borderBottom: `1px solid ${border}`, padding: '0 24px', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(8,8,9,0.95)', backdropFilter: 'blur(12px)', position: 'sticky', top: 0, zIndex: 10 }}>
-        <button onClick={() => window.location.href = '/about'} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          {canGoBack && <button onClick={() => window.history.back()} style={{ display: 'flex', alignItems: 'center', gap: 3, background: 'transparent', border: 'none', cursor: 'pointer', color: td, fontSize: 12, fontFamily: 'inherit', padding: '4px 6px', borderRadius: 6, flexShrink: 0 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="15 18 9 12 15 6"/></svg>Back</button>}
+          <button onClick={() => window.location.href = '/about'} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer' }}>
           <LogoMark size={20} color={tp}/>
           <span style={{ fontSize: 14, fontWeight: 700, color: tp }}>LexIndia</span>
         </button>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={gold} strokeWidth="1.5" strokeLinecap="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
           <span style={{ fontSize: 14, fontWeight: 600, color: gold }}>LexTrack</span>
