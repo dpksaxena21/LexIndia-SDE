@@ -221,7 +221,7 @@ export default function LexPulse() {
     const isSaved = savedIds.has(article.url)
     const isSaving = savingId === article.url
     const btnStyle = (color: string, bg: string) => ({
-      padding: small ? '4px 8px' : '5px 10px',
+      padding: small ? '4px 7px' : '5px 9px',
       background: bg,
       border: `1px solid ${color}33`,
       borderRadius: 6,
@@ -286,11 +286,11 @@ export default function LexPulse() {
             <span style={{ fontSize:14, fontWeight:600, color:gold }}>LexPulse</span>
           </div>
         </div>
-        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
           {lastUpdated && !isMobile && <span style={{ fontSize:11, color:td }}>Updated {formatDate(lastUpdated.toISOString())}</span>}
-          <button onClick={() => fetchNews(category, true)} disabled={refreshing} style={{ display:'flex', alignItems:'center', gap:5, padding:'6px 12px', background:surface, border:`1px solid ${border}`, borderRadius:8, color:tm, fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>
+          <button onClick={() => fetchNews(category, true)} disabled={refreshing} style={{ display:'flex', alignItems:'center', gap:5, padding:'6px 10px', background:surface, border:`1px solid ${border}`, borderRadius:8, color:tm, fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ animation:refreshing?'spin 0.8s linear infinite':'none' }}><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
-            {refreshing ? 'Refreshing...' : 'Refresh'}
+            {!isMobile && (refreshing ? 'Refreshing...' : 'Refresh')}
           </button>
         </div>
       </nav>

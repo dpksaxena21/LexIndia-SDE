@@ -105,11 +105,13 @@ export default function LexTrack() {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={gold} strokeWidth="1.5" strokeLinecap="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
           <span style={{ fontSize: 14, fontWeight: 600, color: gold }}>LexTrack</span>
         </div>
-        <div style={{ display: 'flex', gap: 16, fontSize: 13 }}>
-          <a href="/research" style={{ color: td, textDecoration: 'none' }}>Search</a>
-          <a href="/assistant" style={{ color: td, textDecoration: 'none' }}>Chat</a>
-          <a href="/vault" style={{ color: td, textDecoration: 'none' }}>Vault</a>
-        </div>
+        {!isMobile && (
+          <div style={{ display: 'flex', gap: 16, fontSize: 13 }}>
+            <a href="/research" style={{ color: td, textDecoration: 'none' }}>Search</a>
+            <a href="/assistant" style={{ color: td, textDecoration: 'none' }}>Chat</a>
+            <a href="/vault" style={{ color: td, textDecoration: 'none' }}>Vault</a>
+          </div>
+        )}
       </nav>
 
       <div style={{ maxWidth: 860, margin: '0 auto', padding: isMobile ? '32px 16px' : '48px 24px' }}>
